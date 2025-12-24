@@ -1,4 +1,5 @@
 import { useTheme, THEME_OPTIONS, PALETTE_OPTIONS } from '../contexts/ThemeContext';
+import { useTranslation } from 'react-i18next';
 import { Moon, Sun, Monitor, Palette, Check } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import {
@@ -13,6 +14,7 @@ import { cn } from '@/lib/utils';
 
 export function ThemeToggle() {
     const { theme, setTheme, colorPalette, setColorPalette, resolvedTheme } = useTheme();
+    const { t } = useTranslation();
 
     return (
         <DropdownMenu>
@@ -31,7 +33,7 @@ export function ThemeToggle() {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
                 <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    Theme Mode
+                    {t('theme.mode')}
                 </DropdownMenuLabel>
                 {THEME_OPTIONS.map(option => (
                     <DropdownMenuItem
@@ -43,7 +45,7 @@ export function ThemeToggle() {
                             {option.value === 'dark' && <Moon size={14} />}
                             {option.value === 'light' && <Sun size={14} />}
                             {option.value === 'system' && <Monitor size={14} />}
-                            <span className="text-[11px] font-medium">{option.label}</span>
+                            <span className="text-[11px] font-medium">{t(`theme.${option.value}`)}</span>
                         </div>
                         {theme === option.value && <Check size={14} className="text-primary" />}
                     </DropdownMenuItem>
@@ -51,8 +53,10 @@ export function ThemeToggle() {
 
                 <DropdownMenuSeparator />
 
+                <DropdownMenuSeparator />
+
                 <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">
-                    Color Palette
+                    {t('theme.colorPalette')}
                 </DropdownMenuLabel>
                 <div className="p-2 grid grid-cols-3 gap-2">
                     {PALETTE_OPTIONS.map(option => (
@@ -80,7 +84,7 @@ export function ThemeToggle() {
                 </div>
                 <div className="px-2 pb-2 text-center">
                     <span className="text-[9px] font-medium text-muted-foreground">
-                        {PALETTE_OPTIONS.find(p => p.value === colorPalette)?.label}
+                        {t(`theme.${colorPalette}`)}
                     </span>
                 </div>
             </DropdownMenuContent>

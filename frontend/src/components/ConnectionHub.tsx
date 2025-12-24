@@ -1,5 +1,6 @@
 import React from 'react';
 import { ConnectionConfig, SavedConnection } from '../types';
+import { useTranslation } from 'react-i18next';
 import {
     Plus,
     Database,
@@ -35,6 +36,7 @@ const getDriverDisplay = (type?: string) => {
 }
 
 export function ConnectionHub({ savedConnections, onConnect, onOpenModal, onDelete, loading }: Props) {
+    const { t } = useTranslation();
     return (
         <div className="h-full w-full bg-background flex flex-col items-center justify-center p-8 animate-in fade-in duration-500 overflow-auto">
             <div className="max-w-5xl w-full space-y-12">
@@ -44,10 +46,10 @@ export function ConnectionHub({ savedConnections, onConnect, onOpenModal, onDele
                         <Database size={40} strokeWidth={1.5} />
                     </div>
                     <h1 className="text-5xl font-black tracking-tighter uppercase italic">
-                        RuneDB
+                        {t('connectionHub.heroTitle')}
                     </h1>
                     <p className="text-muted-foreground text-sm font-bold uppercase tracking-[0.3em] max-w-md mx-auto opacity-60 leading-relaxed">
-                        The next generation multi-database management experience.
+                        {t('connectionHub.heroSubtitle')}
                     </p>
                 </div>
 
@@ -62,8 +64,8 @@ export function ConnectionHub({ savedConnections, onConnect, onOpenModal, onDele
                             <Plus size={24} />
                         </div>
                         <div className="text-center">
-                            <h3 className="font-black text-sm uppercase tracking-widest text-primary">New Connection</h3>
-                            <p className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-tight">Deploy a new instance</p>
+                            <h3 className="font-black text-sm uppercase tracking-widest text-primary">{t('connectionHub.newConnection')}</h3>
+                            <p className="text-[10px] text-muted-foreground font-bold mt-1 uppercase tracking-tight">{t('connectionHub.deployInstance')}</p>
                         </div>
                     </Card>
 
@@ -113,7 +115,7 @@ export function ConnectionHub({ savedConnections, onConnect, onOpenModal, onDele
                                         </div>
                                         <div className="flex items-center gap-2 mt-0.5 text-[11px] text-muted-foreground font-mono">
                                             <Zap size={10} className="opacity-40" />
-                                            <span className="opacity-50">USER:</span> {conn.config.user}
+                                            <span className="opacity-50">{t('connectionHub.user')}:</span> {conn.config.user}
                                         </div>
                                     </div>
 
@@ -122,9 +124,9 @@ export function ConnectionHub({ savedConnections, onConnect, onOpenModal, onDele
                                         onClick={() => onConnect(conn.config)}
                                         disabled={loading}
                                     >
-                                        {loading ? "INITIALIZING..." : (
+                                        {loading ? t('connectionHub.initializing') : (
                                             <>
-                                                Go Online <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
+                                                {t('connectionHub.goOnline')} <ArrowRight size={14} className="ml-2 group-hover:translate-x-1 transition-transform" />
                                             </>
                                         )}
                                     </Button>
@@ -139,12 +141,12 @@ export function ConnectionHub({ savedConnections, onConnect, onOpenModal, onDele
                     <div className="flex items-center gap-6">
                         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                             <Activity size={14} />
-                            Engine Status: Optimal
+                            {t('connectionHub.engineStatus')}
                         </div>
                         <Separator orientation="vertical" className="h-4" />
                         <div className="flex items-center gap-2 text-[10px] font-bold uppercase tracking-widest">
                             <Clock size={14} />
-                            Drivers Loaded: {DRIVERS_COUNT}
+                            {t('connectionHub.driversLoaded')}: {DRIVERS_COUNT}
                         </div>
                     </div>
                     <div className="text-[10px] font-mono tracking-tighter">

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import './style.css';
 import { useDatabase } from './hooks/useDatabase';
 import { ConnectionSidebar } from './components/ConnectionSidebar';
@@ -61,6 +62,7 @@ function App() {
         clearError,
         getDatabaseSchema,
     } = useDatabase();
+    const { t } = useTranslation();
 
     const [query, setQuery] = useState(() => {
         return localStorage.getItem('opendb_query') || 'SELECT * FROM ';
@@ -69,7 +71,10 @@ function App() {
     // Tab State
     const [tabs, setTabs] = useState<Tab[]>(() => {
         const saved = localStorage.getItem('opendb_tabs');
-        return saved ? JSON.parse(saved) : [{ id: 'query-main', type: 'query', title: 'Query Editor' }];
+        // We use a constant for the title here because it's initial state, but we should potentially localize it dynamically if re-rendered.
+        // However, tabs state is persisted. We might want to store 'type' and resolve title visually if generic.
+        // For now, let's keep it simple.
+        return saved ? JSON.parse(saved) : [{ id: 'query-main', type: 'query', title: t('app.queryEditor') }];
     });
     const [activeTabId, setActiveTabId] = useState<string>(() => {
         return localStorage.getItem('opendb_active_tab') || 'query-main';
@@ -321,7 +326,7 @@ function App() {
                         <div className="hidden md:flex items-center gap-3">
                             <div className="flex items-center gap-2 px-3 py-1 rounded-full bg-green-500/10 border border-green-500/20 text-[10px] font-black text-green-500 uppercase tracking-tighter">
                                 <Activity size={12} className="animate-pulse" />
-                                {currentDb || "NO DB SELECTED"}
+                                {currentDb || t('app.noDbSelected')}
                             </div>
                             <Separator orientation="vertical" className="h-4" />
                         </div>
@@ -333,7 +338,7 @@ function App() {
                             connected ? 'bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.8)]' : 'bg-destructive shadow-[0_0_8px_rgba(239,68,68,0.8)] animate-pulse'
                         )} />
                         <span className="text-[10px] font-black text-muted-foreground uppercase opacity-80 tracking-widest">
-                            {connected ? 'ONLINE' : 'DISCONNECTED'}
+                            {connected ? t('app.online') : t('app.disconnected')}
                         </span>
                     </div>
 
@@ -344,7 +349,7 @@ function App() {
                     <button
                         onClick={handleToggleFullscreen}
                         className="w-8 h-8 rounded-lg flex items-center justify-center text-muted-foreground hover:text-primary hover:bg-primary/10 transition-all border border-transparent hover:border-primary/20 shadow-none hover:shadow-lg hover:shadow-primary/5"
-                        title={isFullscreen ? "Exit Fullscreen" : "Enter Fullscreen"}
+                        title={isFullscreen ? t('app.exitFullscreen') : t('app.enterFullscreen')}
                     >
                         {isFullscreen ? <Minimize2 size={16} /> : <Maximize2 size={16} />}
                     </button>
@@ -428,7 +433,7 @@ function App() {
                                 />
                             ) : (
                                 <div className="p-10 flex items-center justify-center h-full text-muted-foreground opacity-50 text-sm font-bold uppercase tracking-widest">
-                                    No Tab Selected
+                                    {t('app.noTabSelected')}
                                 </div>
                             )}
                         </div>
@@ -450,8 +455,8 @@ function App() {
                         ) : (
                             <div className="h-full flex flex-col items-center justify-center p-8 text-center opacity-30 select-none grayscale">
                                 <WifiOff size={40} strokeWidth={1} className="mb-4" />
-                                <p className="text-[10px] font-black uppercase tracking-[0.2em]">Offline</p>
-                                <p className="text-[9px] font-medium leading-relaxed mt-2 uppercase">Connect to a server to browse schema objects</p>
+                                <p className="text-[10px] font-black uppercase tracking-[0.2em]">{t('app.offline')}</p>
+                                <p className="text-[9px] font-medium leading-relaxed mt-2 uppercase">{t('app.offlinePrompt')}</p>
                             </div>
                         )}
                     </ResizablePanel>
@@ -462,7 +467,7 @@ function App() {
             {/* Premium Modal */}
             {modalOpen && (
                 <ConnectionModal
-                    title={modalData.name ? "Edit Connection" : "Initialize New Connector"}
+                    title={modalData.name ? t('app.editConnection') : t('app.newConnection')}
                     initialConfig={modalData.config}
                     initialName={modalData.name}
                     onSave={handleSaveModal}
@@ -485,15 +490,15 @@ function App() {
                 <div className="flex items-center gap-4 text-[9px] text-muted-foreground font-black uppercase tracking-widest">
                     <span className="flex items-center gap-1.5 opacity-60">
                         <Info size={10} strokeWidth={3} />
-                        CORE {appVersion}
+                        {t('app.core')} {appVersion}
                     </span>
                     <Separator orientation="vertical" className="h-3 bg-border" />
-                    <span className="opacity-40 select-none">LICENSE: MIT</span>
+                    <span className="opacity-40 select-none">{t('app.license')}</span>
                 </div>
                 <div className="flex items-center gap-3">
                     {connected && activeConnectionName && (
                         <div className="px-2 py-0.5 rounded bg-primary/10 text-primary text-[9px] font-black border border-primary/20 animate-in fade-in slide-in-from-right-2 duration-500">
-                            ACTIVE: {activeConnectionName.toUpperCase()}
+                            {t('app.active')} {activeConnectionName.toUpperCase()}
                         </div>
                     )}
                 </div>
@@ -510,7 +515,7 @@ function App() {
                     const newTab: Tab = {
                         id: `query-${Date.now()}`,
                         type: 'query',
-                        title: 'New Query'
+                        title: t('app.newQuery')
                     };
                     setTabs(prev => [...prev, newTab]);
                     setActiveTabId(newTab.id);

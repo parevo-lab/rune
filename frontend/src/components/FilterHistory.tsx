@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import {
     DropdownMenu,
@@ -22,6 +23,7 @@ const STORAGE_KEY = 'runedb_filter_history';
 const MAX_HISTORY = 10;
 
 export function FilterHistory({ table, currentFilter, onSelectFilter }: FilterHistoryProps) {
+    const { t } = useTranslation();
     const [history, setHistory] = useState<string[]>([]);
 
     useEffect(() => {
@@ -51,10 +53,10 @@ export function FilterHistory({ table, currentFilter, onSelectFilter }: FilterHi
                 </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-64">
-                <DropdownMenuLabel className="text-[10px] uppercase text-muted-foreground">Filter History</DropdownMenuLabel>
+                <DropdownMenuLabel className="text-[10px] uppercase text-muted-foreground">{t('filterHistory.title')}</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 {history.length === 0 ? (
-                    <div className="p-2 text-xs text-muted-foreground text-center italic">No history</div>
+                    <div className="p-2 text-xs text-muted-foreground text-center italic">{t('filterHistory.noHistory')}</div>
                 ) : (
                     history.map((filter, idx) => (
                         <DropdownMenuItem
@@ -71,10 +73,13 @@ export function FilterHistory({ table, currentFilter, onSelectFilter }: FilterHi
                 <DropdownMenuSeparator />
                 <DropdownMenuItem
                     className="text-[10px] text-destructive focus:text-destructive"
-                    onClick={() => clearHistory(table, setHistory)}
+                    onClick={() => {
+                        clearHistory(table, setHistory);
+                        toast.success(t('filterHistory.cleared'));
+                    }}
                 >
                     <Trash2 size={12} className="mr-2" />
-                    Clear History
+                    {t('filterHistory.clear')}
                 </DropdownMenuItem>
             </DropdownMenuContent>
         </DropdownMenu>
@@ -122,7 +127,9 @@ function clearHistory(table: string, setHistory: (h: string[]) => void) {
         delete allHistory[table];
         localStorage.setItem(STORAGE_KEY, JSON.stringify(allHistory));
         setHistory([]);
-        toast.success("History cleared");
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(allHistory));
+        setHistory([]);
+        // toast.success("History cleared"); // moved to component
     } catch (e) {
         console.error("Failed to clear history", e);
     }

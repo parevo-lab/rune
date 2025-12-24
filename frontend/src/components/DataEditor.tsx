@@ -1,5 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { ColumnInfo, TableDataResponse } from '../types';
+import { useTranslation } from 'react-i18next';
 import { GetTableData, InsertRow, UpdateRow, DeleteRow, SelectExportPath, ExportTable } from '../../wailsjs/go/main/App';
 import {
     Plus,
@@ -89,6 +90,7 @@ interface Props {
 }
 
 export function DataEditor({ database, table, onClose }: Props) {
+    const { t } = useTranslation();
     const { truncateTable, dropTable, alterTable } = useDatabase();
     const [data, setData] = useState<TableDataResponse | null>(null);
     const [loading, setLoading] = useState(false);
@@ -410,7 +412,7 @@ export function DataEditor({ database, table, onClose }: Props) {
             }).join(',')
         ).join('\n');
         navigator.clipboard.writeText(`${header}\n${csvData}`);
-        toast.success('Copied as CSV');
+        toast.success(t('resultsTable.copiedToClipboard'));
     };
 
     const copyAsJSON = () => {
@@ -424,21 +426,22 @@ export function DataEditor({ database, table, onClose }: Props) {
             return obj;
         });
         navigator.clipboard.writeText(JSON.stringify(jsonData, null, 2));
-        toast.success('Copied as JSON');
+        toast.success(t('resultsTable.copiedToClipboard'));
     };
 
     const handleExport = async (format: 'xlsx' | 'csv' | 'json') => {
         try {
             const path = await SelectExportPath(format);
             if (!path) return; // Cancelled
-
+            // Need to pass translated strings to toast promise if possible, or handle individually
+            // For now, simpler messages:
             toast.promise(ExportTable(database, table, format, path), {
-                loading: 'Exporting data...',
-                success: 'Data exported successfully',
-                error: (err) => `Export failed: ${err}`
+                loading: t('dataEditor.exporting'),
+                success: t('dataEditor.exportSuccess'),
+                error: (err) => `${t('dataEditor.exportFailed')}: ${err}`
             });
         } catch (err: any) {
-            toast.error(`Export failed: ${err.message}`);
+            toast.error(`${t('dataEditor.exportFailed')}: ${err.message}`);
         }
     };
 
@@ -454,7 +457,7 @@ export function DataEditor({ database, table, onClose }: Props) {
             return `INSERT INTO ${table} (${columns.join(', ')}) VALUES (${values});`;
         }).join('\n');
         navigator.clipboard.writeText(inserts);
-        toast.success('Copied as SQL INSERT');
+        toast.success(t('resultsTable.copiedToClipboard'));
     };
 
     const getSelectedRowsData = (): any[][] => {
@@ -467,7 +470,7 @@ export function DataEditor({ database, table, onClose }: Props) {
         return (
             <div className="h-full flex flex-col items-center justify-center space-y-4">
                 <div className="w-8 h-8 border-4 border-primary/20 border-t-primary rounded-full animate-spin" />
-                <p className="text-sm text-muted-foreground animate-pulse font-medium uppercase tracking-widest text-[10px]">Loading Data...</p>
+                <p className="text-sm text-muted-foreground animate-pulse font-medium uppercase tracking-widest text-[10px]">{t('dataEditor.loadingData')}</p>
             </div>
         );
     }
@@ -485,12 +488,12 @@ export function DataEditor({ database, table, onClose }: Props) {
                     <div>
                         <h3 className="text-sm font-black tracking-tight flex items-center gap-2 uppercase">
                             {table}
-                            {activeFilter && <Badge variant="secondary" className="h-4 text-[8px] bg-primary/20 text-primary animate-pulse">FILTERED</Badge>}
+                            {activeFilter && <Badge variant="secondary" className="h-4 text-[8px] bg-primary/20 text-primary animate-pulse">{t('dataEditor.filtered')}</Badge>}
                         </h3>
                         <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-mono">
                             <span className="opacity-60">{database}</span>
                             <Separator orientation="vertical" className="h-2" />
-                            <span className="text-primary/70">{data.totalRows} ROWS</span>
+                            <span className="text-primary/70">{data.totalRows} {t('dataEditor.totalRows')}</span>
                         </div>
                     </div>
                 </div>
@@ -500,7 +503,7 @@ export function DataEditor({ database, table, onClose }: Props) {
                     <div className="flex-1 max-w-md relative group">
                         <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 transition-colors group-hover:text-primary/70" size={14} />
                         <Input
-                            placeholder="Search everywhere..."
+                            placeholder={t('dataEditor.searchPlaceholder')}
                             className="h-8 pl-8 bg-background/50 border-muted-foreground/20 focus-visible:bg-background transition-all text-xs w-full"
                             value={globalSearch}
                             onChange={(e) => setGlobalSearch(e.target.value)}
@@ -519,7 +522,7 @@ export function DataEditor({ database, table, onClose }: Props) {
                     {/* Active Filters Display & Clear */}
                     {activeFilter && !showChart && (
                         <div className="flex items-center gap-2 mr-2 animate-in fade-in slide-in-from-right-4">
-                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/70 hover:text-primary" onClick={loadData} title="Refresh Data">
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/70 hover:text-primary" onClick={loadData} title={t('common.refresh')}>
                                 <RefreshCcw size={14} />
                             </Button>
 
@@ -532,7 +535,7 @@ export function DataEditor({ database, table, onClose }: Props) {
                                     setGlobalSearch(''); // Clear global search
                                     setPage(1);
                                     loadData();
-                                    toast.success("Applied filter from history");
+                                    toast.success(t('dataEditor.appliedFilterHistory'));
                                 }}
                             />
 
@@ -545,7 +548,7 @@ export function DataEditor({ database, table, onClose }: Props) {
                                     setPage(1);
                                     setPage(1);
                                     // loadData handled by effect
-                                    toast.success("Raw filter applied");
+                                    toast.success(t('dataEditor.rawFilterApplied'));
                                 }}
                             />
 
@@ -554,7 +557,7 @@ export function DataEditor({ database, table, onClose }: Props) {
                                 size="icon"
                                 className={cn("h-7 w-7 text-muted-foreground/70 hover:text-destructive", (Object.keys(columnFilters).length > 0 || globalSearch) ? "opacity-100" : "opacity-30")}
                                 onClick={clearAllFilters}
-                                title="Clear All Filters"
+                                title={t('dataEditor.clearAllFilters')}
                             >
                                 <FilterX size={14} />
                             </Button>
@@ -568,7 +571,7 @@ export function DataEditor({ database, table, onClose }: Props) {
                         onClick={() => setShowChart(!showChart)}
                     >
                         <PieChart size={14} className={showChart ? "text-primary" : "text-muted-foreground"} />
-                        <span className="hidden sm:inline">Visualize</span>
+                        <span className="hidden sm:inline">{t('common.visualize')}</span>
                     </Button>
                     <Separator orientation="vertical" className="h-5 mx-0.5" />
 
@@ -580,7 +583,7 @@ export function DataEditor({ database, table, onClose }: Props) {
                             onClick={() => setShowAddRow(true)}
                         >
                             <Plus size={14} className="text-primary" />
-                            <span className="hidden sm:inline">ROW</span>
+                            <span className="hidden sm:inline">{t('common.row')}</span>
                         </Button>
                     )}
 
@@ -592,33 +595,33 @@ export function DataEditor({ database, table, onClose }: Props) {
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-48">
                             <DropdownMenuItem className="text-[11px] font-medium" onClick={() => loadData()}>
-                                <RefreshCcw size={12} className="mr-2" /> Refresh Data
+                                <RefreshCcw size={12} className="mr-2" /> {t('dataEditor.refreshData')}
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-[11px] font-medium" onClick={() => setShowModifyModal(true)}>
-                                <Settings2 size={12} className="mr-2" /> Modify Table
+                                <Settings2 size={12} className="mr-2" /> {t('dataEditor.modifyTable')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem className="text-[11px] font-medium" onClick={() => handleExport('xlsx')}>
-                                <FileText size={12} className="mr-2 text-green-600" /> Export to Excel
+                                <FileText size={12} className="mr-2 text-green-600" /> {t('dataEditor.exportToExcel')}
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-[11px] font-medium" onClick={() => handleExport('csv')}>
-                                <Download size={12} className="mr-2" /> Export to CSV
+                                <Download size={12} className="mr-2" /> {t('dataEditor.exportToCSV')}
                             </DropdownMenuItem>
                             <DropdownMenuItem className="text-[11px] font-medium" onClick={() => handleExport('json')}>
-                                <FileJson size={12} className="mr-2" /> Export to JSON
+                                <FileJson size={12} className="mr-2" /> {t('dataEditor.exportToJSON')}
                             </DropdownMenuItem>
                             <DropdownMenuSeparator />
                             <DropdownMenuItem
                                 className="text-[11px] font-medium text-destructive focus:text-destructive"
                                 onClick={() => setConfirmAction({ type: 'truncate' })}
                             >
-                                <Eraser size={12} className="mr-2" /> Truncate Table
+                                <Eraser size={12} className="mr-2" /> {t('dataEditor.truncateTable')}
                             </DropdownMenuItem>
                             <DropdownMenuItem
                                 className="text-[11px] font-medium text-destructive focus:text-destructive"
                                 onClick={() => setConfirmAction({ type: 'drop' })}
                             >
-                                <Trash2 size={12} className="mr-2" /> Drop Table
+                                <Trash2 size={12} className="mr-2" /> {t('dataEditor.dropTable')}
                             </DropdownMenuItem>
                         </DropdownMenuContent>
                     </DropdownMenu>
@@ -635,7 +638,7 @@ export function DataEditor({ database, table, onClose }: Props) {
                     <Card className="m-4 border-primary/20 bg-primary/5 shadow-xl animate-in slide-in-from-top-4 duration-300">
                         <CardContent className="p-4">
                             <div className="flex items-center justify-between mb-4">
-                                <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-primary">New Entry</h4>
+                                <h4 className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{t('dataEditor.newEntry')}</h4>
                                 <Button variant="ghost" size="icon" className="h-6 w-6" onClick={() => setShowAddRow(false)}>
                                     <X size={14} />
                                 </Button>
@@ -656,12 +659,12 @@ export function DataEditor({ database, table, onClose }: Props) {
                                                 onValueChange={(val) => setNewRowData({ ...newRowData, [col.name]: val })}
                                             >
                                                 <SelectTrigger className="h-7 text-xs bg-background">
-                                                    <SelectValue placeholder={col.nullable ? "NULL" : "Select..."} />
+                                                    <SelectValue placeholder={col.nullable ? t("dataEditor.null") : t("dataEditor.select")} />
                                                 </SelectTrigger>
                                                 <SelectContent>
-                                                    {col.nullable && <SelectItem value="">NULL</SelectItem>}
-                                                    <SelectItem value="1">TRUE</SelectItem>
-                                                    <SelectItem value="0">FALSE</SelectItem>
+                                                    {col.nullable && <SelectItem value="">{t('dataEditor.null')}</SelectItem>}
+                                                    <SelectItem value="1">{t('dataEditor.true')}</SelectItem>
+                                                    <SelectItem value="0">{t('dataEditor.false')}</SelectItem>
                                                 </SelectContent>
                                             </Select>
                                         ) : (
@@ -677,16 +680,16 @@ export function DataEditor({ database, table, onClose }: Props) {
                                 ))}
                             </div>
                             <div className="flex justify-end gap-2 mt-6">
-                                <Button variant="ghost" size="sm" className="h-8 text-[11px] font-bold" onClick={() => setShowAddRow(false)}>CANCEL</Button>
+                                <Button variant="ghost" size="sm" className="h-8 text-[11px] font-bold" onClick={() => setShowAddRow(false)}>{t('common.cancel').toUpperCase()}</Button>
                                 <Button
                                     variant="outline"
                                     size="sm"
                                     className="h-8 px-4 text-[11px] font-bold uppercase border-primary/20 text-primary hover:bg-primary/5"
                                     onClick={() => handleAddRow(true)}
                                 >
-                                    Commit & Add Another
+                                    {t('dataEditor.commitAndAdd')}
                                 </Button>
-                                <Button size="sm" className="h-8 px-6 text-[11px] font-bold uppercase" onClick={() => handleAddRow(false)}>Commit Row</Button>
+                                <Button size="sm" className="h-8 px-6 text-[11px] font-bold uppercase" onClick={() => handleAddRow(false)}>{t('dataEditor.commitRow')}</Button>
                             </div>
                         </CardContent>
                     </Card>
@@ -744,7 +747,7 @@ export function DataEditor({ database, table, onClose }: Props) {
                                                                 <span className="text-[11px] font-bold uppercase tracking-tight truncate" title={col.name}>
                                                                     {col.name}
                                                                 </span>
-                                                                {col.key === 'PRI' && <div className="w-1 h-1 rounded-full bg-amber-500" title="Primary Key" />}
+                                                                {col.key === 'PRI' && <div className="w-1 h-1 rounded-full bg-amber-500" title={t('dataEditor.primaryKey')} />}
                                                             </div>
 
                                                             <div className="flex items-center text-muted-foreground/30 group-hover/header:text-muted-foreground/80 transition-colors">

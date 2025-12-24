@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ConnectionConfig } from '../types';
 import {
     X,
@@ -79,6 +80,7 @@ const SSL_MODES = [
 ];
 
 export function ConnectionModal({ title, initialConfig, initialName, onSave, onClose, onTest, loading }: Props) {
+    const { t } = useTranslation();
     const [config, setConfig] = useState<ConnectionConfig>(initialConfig || {
         type: 'mysql',
         host: 'localhost',
@@ -153,7 +155,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                             <DialogTitle className="text-lg font-black tracking-tight uppercase italic">
                                 {title}
                             </DialogTitle>
-                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none mt-1 opacity-60">Engine Configuration</p>
+                            <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none mt-1 opacity-60">{t('connectionModal.title')}</p>
                         </div>
                     </div>
                 </DialogHeader>
@@ -163,7 +165,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                     <div className="grid grid-cols-2 gap-4">
                         <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 tracking-widest">
-                                Display Name
+                                {t('connectionModal.displayName')}
                             </Label>
                             <Input
                                 className="h-9 text-[11px] font-bold bg-background/50 border-muted-foreground/20 focus-visible:ring-primary/30"
@@ -174,11 +176,11 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         </div>
                         <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 tracking-widest">
-                                Engine Type
+                                {t('connectionModal.engineType')}
                             </Label>
                             <Select value={config.type} onValueChange={handleDriverChange}>
                                 <SelectTrigger className="h-9 text-[11px] font-bold bg-background/50 border-muted-foreground/20">
-                                    <SelectValue placeholder="Select Engine" />
+                                    <SelectValue placeholder={t('connectionModal.selectEngine')} />
                                 </SelectTrigger>
                                 <SelectContent>
                                     {DRIVERS.map(driver => (
@@ -195,7 +197,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                     <div className="space-y-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 tracking-widest">
                             <Palette size={11} className="text-primary/60" />
-                            Environment Color
+                            {t('connectionModal.environmentColor')}
                         </Label>
                         <div className="flex gap-2 flex-wrap">
                             {ENV_COLORS.map(env => (
@@ -229,7 +231,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         {isProd && (
                             <div className="flex items-center gap-2 text-[10px] text-orange-500 font-bold uppercase tracking-wide mt-1">
                                 <AlertTriangle size={12} />
-                                <span>Production environment - Be careful!</span>
+                                <span>{t('connectionModal.productionWarning')}</span>
                             </div>
                         )}
                     </div>
@@ -241,7 +243,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         <div className="col-span-2 space-y-2">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 tracking-widest">
                                 <Globe size={11} className="text-primary/60" />
-                                Host address
+                                {t('connectionModal.hostAddress')}
                             </Label>
                             <Input
                                 className="h-9 text-[11px] font-mono bg-background/50"
@@ -253,7 +255,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 tracking-widest">
                                 <Hash size={11} className="text-primary/60" />
-                                Port
+                                {t('connectionModal.port')}
                             </Label>
                             <Input
                                 className="h-9 text-[11px] font-mono bg-background/50"
@@ -268,7 +270,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 tracking-widest">
                                 <ShieldCheck size={11} className="text-primary/60" />
-                                Username
+                                {t('connectionModal.username')}
                             </Label>
                             <Input
                                 className="h-9 text-[11px] font-mono bg-background/50"
@@ -280,7 +282,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         <div className="space-y-2">
                             <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 tracking-widest">
                                 <KeyRound size={11} className="text-primary/60" />
-                                Password
+                                {t('connectionModal.password')}
                             </Label>
                             <Input
                                 className="h-9 text-[11px] font-mono bg-background/50"
@@ -294,7 +296,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
 
                     <div className="space-y-2">
                         <Label className="text-[10px] font-black uppercase text-muted-foreground flex items-center gap-2 tracking-widest">
-                            Initial Database / Schema
+                            {t('connectionModal.initialDatabase')}
                         </Label>
                         <Input
                             className="h-9 text-[11px] font-mono bg-background/50 border-muted-foreground/20"
@@ -309,7 +311,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border border-border/40">
                             <div className="flex items-center gap-2">
                                 <Server size={14} className="text-blue-500" />
-                                <span className="text-[11px] font-black uppercase tracking-wide">SSH Tunnel</span>
+                                <span className="text-[11px] font-black uppercase tracking-wide">{t('connectionModal.sshTunnel')}</span>
                                 {config.useSSHTunnel && (
                                     <Badge variant="secondary" className="text-[8px] bg-blue-500/20 text-blue-500 h-4 px-1.5">ENABLED</Badge>
                                 )}
@@ -319,7 +321,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         <CollapsibleContent className="mt-3 space-y-4 p-4 rounded-lg border border-border/40 bg-muted/10">
                             <div className="flex items-center justify-between">
                                 <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                    Enable SSH Tunnel
+                                    {t('connectionModal.enableSSHTunnel')}
                                 </Label>
                                 <Switch
                                     checked={config.useSSHTunnel}
@@ -331,7 +333,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                                 <>
                                     <div className="grid grid-cols-3 gap-3">
                                         <div className="col-span-2 space-y-2">
-                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">SSH Host</Label>
+                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">{t('connectionModal.sshHost')}</Label>
                                             <Input
                                                 className="h-8 text-[10px] font-mono bg-background/50"
                                                 value={config.sshHost}
@@ -340,7 +342,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">SSH Port</Label>
+                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">{t('connectionModal.sshPort')}</Label>
                                             <Input
                                                 className="h-8 text-[10px] font-mono bg-background/50"
                                                 type="number"
@@ -352,7 +354,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="space-y-2">
                                             <Label className="text-[9px] font-bold uppercase text-muted-foreground flex items-center gap-1">
-                                                <Key size={10} /> SSH User
+                                                <Key size={10} /> {t('connectionModal.sshUser')}
                                             </Label>
                                             <Input
                                                 className="h-8 text-[10px] font-mono bg-background/50"
@@ -362,7 +364,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">SSH Password</Label>
+                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">{t('connectionModal.sshPassword')}</Label>
                                             <Input
                                                 className="h-8 text-[10px] font-mono bg-background/50"
                                                 type="password"
@@ -374,7 +376,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                                     </div>
                                     <div className="space-y-2">
                                         <Label className="text-[9px] font-bold uppercase text-muted-foreground flex items-center gap-1">
-                                            <FileKey size={10} /> Private Key (PEM)
+                                            <FileKey size={10} /> {t('connectionModal.privateKey')}
                                         </Label>
                                         <Textarea
                                             className="h-20 text-[9px] font-mono bg-background/50 resize-none"
@@ -384,7 +386,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                                         />
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">Key Passphrase</Label>
+                                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">{t('connectionModal.keyPassphrase')}</Label>
                                         <Input
                                             className="h-8 text-[10px] font-mono bg-background/50"
                                             type="password"
@@ -403,7 +405,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         <CollapsibleTrigger className="flex items-center justify-between w-full p-3 rounded-lg bg-muted/30 hover:bg-muted/50 transition-colors border border-border/40">
                             <div className="flex items-center gap-2">
                                 <Shield size={14} className="text-green-500" />
-                                <span className="text-[11px] font-black uppercase tracking-wide">SSL / TLS</span>
+                                <span className="text-[11px] font-black uppercase tracking-wide">{t('connectionModal.sslTls')}</span>
                                 {config.useSSL && (
                                     <Badge variant="secondary" className="text-[8px] bg-green-500/20 text-green-500 h-4 px-1.5">ENCRYPTED</Badge>
                                 )}
@@ -413,7 +415,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         <CollapsibleContent className="mt-3 space-y-4 p-4 rounded-lg border border-border/40 bg-muted/10">
                             <div className="flex items-center justify-between">
                                 <Label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">
-                                    Enable SSL/TLS
+                                    {t('connectionModal.enableSsl')}
                                 </Label>
                                 <Switch
                                     checked={config.useSSL}
@@ -424,7 +426,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                             {config.useSSL && (
                                 <>
                                     <div className="space-y-2">
-                                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">SSL Mode</Label>
+                                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">{t('connectionModal.sslMode')}</Label>
                                         <Select
                                             value={config.sslMode || 'require'}
                                             onValueChange={(val) => setConfig({ ...config, sslMode: val })}
@@ -445,7 +447,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                                         </Select>
                                     </div>
                                     <div className="space-y-2">
-                                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">CA Certificate</Label>
+                                        <Label className="text-[9px] font-bold uppercase text-muted-foreground">{t('connectionModal.caCertificate')}</Label>
                                         <Textarea
                                             className="h-16 text-[9px] font-mono bg-background/50 resize-none"
                                             value={config.sslCACert}
@@ -455,7 +457,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                                     </div>
                                     <div className="grid grid-cols-2 gap-3">
                                         <div className="space-y-2">
-                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">Client Certificate</Label>
+                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">{t('connectionModal.clientCertificate')}</Label>
                                             <Textarea
                                                 className="h-16 text-[9px] font-mono bg-background/50 resize-none"
                                                 value={config.sslClientCert}
@@ -464,7 +466,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                                             />
                                         </div>
                                         <div className="space-y-2">
-                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">Client Key</Label>
+                                            <Label className="text-[9px] font-bold uppercase text-muted-foreground">{t('connectionModal.clientKey')}</Label>
                                             <Textarea
                                                 className="h-16 text-[9px] font-mono bg-background/50 resize-none"
                                                 value={config.sslClientKey}
@@ -483,8 +485,8 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                             "p-3 rounded-xl border text-[11px] font-black flex items-center justify-between animate-in fade-in slide-in-from-bottom-2 duration-300 uppercase tracking-widest",
                             testResult === 'success' ? "bg-green-500/10 border-green-500/30 text-green-500" : "bg-destructive/10 border-destructive/30 text-destructive"
                         )}>
-                            <span>{testResult === 'success' ? '✓ Connector Handshake OK' : '✗ Network/Auth Timeout'}</span>
-                            {testResult === 'success' && <Badge variant="secondary" className="text-[8px] bg-green-500 text-white h-4 px-1.5 border-none">LINKED</Badge>}
+                            <span>{testResult === 'success' ? `✓ ${t('connectionModal.testOk')}` : `✗ ${t('connectionModal.testFail')}`}</span>
+                            {testResult === 'success' && <Badge variant="secondary" className="text-[8px] bg-green-500 text-white h-4 px-1.5 border-none">{t('connectionModal.linked')}</Badge>}
                         </div>
                     )}
                 </div>
@@ -497,11 +499,11 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                         disabled={loading}
                     >
                         <FlaskConical size={14} className="mr-2" />
-                        Dry Run
+                        {t('connectionModal.dryRun')}
                     </Button>
                     <div className="flex gap-2 flex-1">
                         <Button variant="ghost" className="flex-1 h-9 text-[10px] font-black uppercase tracking-widest" onClick={onClose}>
-                            Esc
+                            {t('connectionModal.esc')}
                         </Button>
                         <Button
                             className={cn(
@@ -512,7 +514,7 @@ export function ConnectionModal({ title, initialConfig, initialName, onSave, onC
                             disabled={loading || !name.trim()}
                         >
                             <Save size={14} className="mr-2" />
-                            DEPLOY
+                            {t('connectionModal.deploy')}
                         </Button>
                     </div>
                 </DialogFooter>

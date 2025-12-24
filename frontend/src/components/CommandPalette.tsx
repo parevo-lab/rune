@@ -1,4 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     CommandDialog,
     CommandEmpty,
@@ -50,6 +51,7 @@ export function CommandPalette({
     onRefresh,
     onOpenSettings
 }: CommandPaletteProps) {
+    const { t } = useTranslation();
     const runAction = (action: () => void) => {
         action();
         onOpenChange(false);
@@ -57,27 +59,27 @@ export function CommandPalette({
 
     return (
         <CommandDialog open={open} onOpenChange={onOpenChange}>
-            <CommandInput placeholder="Type a command or search..." />
+            <CommandInput placeholder={t('commandPalette.placeholder')} />
             <CommandList>
-                <CommandEmpty>No results found.</CommandEmpty>
+                <CommandEmpty>{t('commandPalette.noResults')}</CommandEmpty>
 
                 {/* Quick Actions */}
-                <CommandGroup heading="Quick Actions">
+                <CommandGroup heading={t('commandPalette.quickActions')}>
                     <CommandItem onSelect={() => runAction(onNewQueryTab)}>
                         <Plus className="mr-2 h-4 w-4" />
-                        <span>New Query Tab</span>
+                        <span>{t('commandPalette.newQueryTab')}</span>
                         <kbd className="ml-auto pointer-events-none inline-flex h-5 select-none items-center gap-1 rounded border bg-muted px-1.5 font-mono text-[10px] font-medium text-muted-foreground">
                             ⌘T
                         </kbd>
                     </CommandItem>
                     <CommandItem onSelect={() => runAction(onOpenHistory)}>
                         <History className="mr-2 h-4 w-4" />
-                        <span>Query History</span>
+                        <span>{t('commandPalette.queryHistory')}</span>
                     </CommandItem>
                     {connected && (
                         <CommandItem onSelect={() => runAction(onRefresh)}>
                             <RefreshCw className="mr-2 h-4 w-4" />
-                            <span>Refresh Schema</span>
+                            <span>{t('commandPalette.refreshSchema')}</span>
                         </CommandItem>
                     )}
                 </CommandGroup>
@@ -86,7 +88,7 @@ export function CommandPalette({
                 {connected && databases.length > 0 && (
                     <>
                         <CommandSeparator />
-                        <CommandGroup heading="Switch Database">
+                        <CommandGroup heading={t('commandPalette.switchDatabase')}>
                             {databases.map((db) => (
                                 <CommandItem
                                     key={db.name}
@@ -96,7 +98,7 @@ export function CommandPalette({
                                     <Database className="mr-2 h-4 w-4" />
                                     <span>{db.name}</span>
                                     {db.name === currentDb && (
-                                        <span className="ml-auto text-[10px] text-primary font-bold uppercase">Active</span>
+                                        <span className="ml-auto text-[10px] text-primary font-bold uppercase">{t('commandPalette.active')}</span>
                                     )}
                                 </CommandItem>
                             ))}
@@ -106,15 +108,15 @@ export function CommandPalette({
 
                 {/* Settings & Connection */}
                 <CommandSeparator />
-                <CommandGroup heading="Settings">
+                <CommandGroup heading={t('commandPalette.settings')}>
                     <CommandItem onSelect={() => runAction(onOpenSettings)}>
                         <Settings className="mr-2 h-4 w-4" />
-                        <span>Connection Settings</span>
+                        <span>{t('commandPalette.connectionSettings')}</span>
                     </CommandItem>
                     {connected && (
                         <CommandItem onSelect={() => runAction(onDisconnect)} className="text-destructive">
                             <LogOut className="mr-2 h-4 w-4" />
-                            <span>Disconnect</span>
+                            <span>{t('commandPalette.disconnect')}</span>
                         </CommandItem>
                     )}
                 </CommandGroup>

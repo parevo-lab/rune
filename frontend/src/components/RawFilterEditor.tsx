@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Button } from "@/components/ui/button";
 import {
     Dialog,
@@ -21,6 +22,7 @@ interface RawFilterEditorProps {
 }
 
 export function RawFilterEditor({ currentFilter, onSave }: RawFilterEditorProps) {
+    const { t } = useTranslation();
     const [open, setOpen] = useState(false);
     const [value, setValue] = useState(currentFilter);
     const [error, setError] = useState<string | null>(null);
@@ -43,13 +45,15 @@ export function RawFilterEditor({ currentFilter, onSave }: RawFilterEditorProps)
 
         onSave(value);
         setOpen(false);
-        toast.success("Raw filter applied");
+        onSave(value);
+        setOpen(false);
+        toast.success(t('rawFilter.applied'));
     };
 
     return (
         <Dialog open={open} onOpenChange={setOpen}>
             <DialogTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/70 hover:text-primary" title="Edit Raw SQL Filter">
+                <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/70 hover:text-primary" title={t('rawFilter.title')}>
                     <Code size={14} />
                 </Button>
             </DialogTrigger>
@@ -57,11 +61,11 @@ export function RawFilterEditor({ currentFilter, onSave }: RawFilterEditorProps)
                 <DialogHeader>
                     <DialogTitle className="text-sm font-bold uppercase flex items-center gap-2">
                         <Code size={16} />
-                        Raw SQL Filter Editor
+                        {t('rawFilter.title')}
                     </DialogTitle>
                     <DialogDescription className="text-xs text-muted-foreground">
-                        Edit the <code className="bg-muted px-1 rounded">WHERE</code> clause directly.
-                        Warning: Using column filters after this will overwrite your changes.
+                        {t('rawFilter.description')}
+                        {t('rawFilter.warning')}
                     </DialogDescription>
                 </DialogHeader>
 
@@ -70,20 +74,20 @@ export function RawFilterEditor({ currentFilter, onSave }: RawFilterEditorProps)
                         value={value}
                         onChange={(e) => setValue(e.target.value)}
                         className="font-mono text-xs min-h-[150px] bg-muted/30 resize-none"
-                        placeholder="e.g. id > 5 AND (status = 'active' OR role = 'admin')"
+                        placeholder={t('rawFilter.placeholder')}
                     />
                 </div>
 
                 <DialogFooter>
                     <div className="flex w-full justify-between items-center">
                         <Button variant="ghost" size="sm" onClick={() => setValue('')} className="text-xs text-muted-foreground">
-                            Clear
+                            {t('rawFilter.clear')}
                         </Button>
                         <div className="flex gap-2">
-                            <Button variant="outline" size="sm" onClick={() => setOpen(false)}>Cancel</Button>
+                            <Button variant="outline" size="sm" onClick={() => setOpen(false)}>{t('rawFilter.cancel')}</Button>
                             <Button size="sm" onClick={handleSave} className="gap-2">
                                 <Save size={14} />
-                                Apply
+                                {t('rawFilter.apply')}
                             </Button>
                         </div>
                     </div>

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ColumnInfo, TableAlteration } from '../types';
 import {
     X,
@@ -68,6 +69,7 @@ const typeGroups: Record<string, string[]> = {
 const allGroupedTypes = Object.values(typeGroups).reduce((acc, val) => acc.concat(val), [] as string[]);
 
 export function ModifyTableModal({ database, table, columns, onSave, onClose, loading }: Props) {
+    const { t } = useTranslation();
     const [columnStates, setColumnStates] = useState<ColumnState[]>([]);
 
     useEffect(() => {
@@ -125,10 +127,10 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                         </div>
                         <div>
                             <DialogTitle className="text-lg font-black tracking-tight uppercase flex items-center gap-2">
-                                Modify Schema: <span className="text-primary">{table}</span>
+                                {t('modifyModal.title')}: <span className="text-primary">{table}</span>
                             </DialogTitle>
                             <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none mt-1 opacity-60">
-                                Host: {database} • MySQL Engine
+                                {t('modifyModal.subtitle', { host: database, engine: 'MySQL' })}
                             </p>
                         </div>
                     </div>
@@ -137,11 +139,11 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                 <div className="flex-1 overflow-hidden p-6 flex flex-col gap-4">
                     <div className="flex items-center justify-between text-[11px] font-black uppercase tracking-tighter text-muted-foreground/50 border-b pb-2 px-1">
                         <div className="flex-1 flex gap-4">
-                            <span className="w-48">Column Name</span>
-                            <span className="w-32">Type</span>
-                            <span className="w-16 text-center">Null</span>
-                            <span className="w-32">Default</span>
-                            <span className="w-24">Key</span>
+                            <span className="w-48">{t('modifyModal.columnName')}</span>
+                            <span className="w-32">{t('modifyModal.type')}</span>
+                            <span className="w-16 text-center">{t('modifyModal.null')}</span>
+                            <span className="w-32">{t('modifyModal.default')}</span>
+                            <span className="w-24">{t('modifyModal.key')}</span>
                         </div>
                         <div className="w-10" />
                     </div>
@@ -224,9 +226,9 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                                                         <SelectValue placeholder="NULL" />
                                                     </SelectTrigger>
                                                     <SelectContent>
-                                                        <SelectItem value="">NULL</SelectItem>
-                                                        <SelectItem value="1">TRUE</SelectItem>
-                                                        <SelectItem value="0">FALSE</SelectItem>
+                                                        <SelectItem value="">{t('dataEditor.null')}</SelectItem>
+                                                        <SelectItem value="1">{t('dataEditor.true')}</SelectItem>
+                                                        <SelectItem value="0">{t('dataEditor.false')}</SelectItem>
                                                     </SelectContent>
                                                 </Select>
                                             ) : (
@@ -256,7 +258,7 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                                                         </Toggle>
                                                     </TooltipTrigger>
                                                     <TooltipContent>
-                                                        <p>Primary Key (New Columns Only)</p>
+                                                        <p>{t('modifyModal.primaryKeyTooltip')}</p>
                                                     </TooltipContent>
                                                 </Tooltip>
                                             </TooltipProvider>
@@ -287,7 +289,7 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                         className="w-full h-10 border-2 border-dashed border-muted-foreground/10 hover:border-primary/20 hover:bg-primary/5 text-muted-foreground hover:text-primary font-black uppercase tracking-widest text-[10px] gap-2 transition-all mt-2"
                     >
                         <Plus size={16} />
-                        Append New Attribute
+                        {t('modifyModal.appendAttribute')}
                     </Button>
                 </div>
 
@@ -296,13 +298,13 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                         {(columnStates.some(c => c.isNew || c.isModified || c.isDeleted)) && (
                             <div className="flex items-center gap-2 text-[10px] font-bold text-amber-500 animate-pulse uppercase tracking-widest">
                                 <AlertTriangle size={14} />
-                                Pending schema modifications detected
+                                {t('modifyModal.pendingChanges')}
                             </div>
                         )}
                     </div>
                     <div className="flex gap-2">
                         <Button variant="ghost" className="h-10 px-6 text-[11px] font-bold uppercase tracking-widest hover:bg-destructive/5 hover:text-destructive" onClick={onClose}>
-                            Discard Changes
+                            {t('modifyModal.discardChanges')}
                         </Button>
                         <Button
                             className="h-10 px-8 text-[11px] font-black uppercase tracking-widest shadow-xl shadow-primary/20"
@@ -310,7 +312,7 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                             disabled={loading || !columnStates.some(c => c.isNew || c.isModified || c.isDeleted)}
                         >
                             <Save className="mr-2 h-4 w-4" />
-                            Apply Migrations
+                            {t('modifyModal.applyMigrations')}
                         </Button>
                     </div>
                 </DialogFooter>

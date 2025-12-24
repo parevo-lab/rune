@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     BarChart,
     Bar,
@@ -38,6 +39,7 @@ type ChartType = 'bar' | 'line' | 'area' | 'pie';
 const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884d8', '#82ca9d'];
 
 export function DataVisualizer({ data, columns }: Props) {
+    const { t } = useTranslation();
     const [chartType, setChartType] = useState<ChartType>('bar');
     const [xAxis, setXAxis] = useState<string>('');
     const [yAxis, setYAxis] = useState<string>('');
@@ -55,7 +57,7 @@ export function DataVisualizer({ data, columns }: Props) {
     }, [columns]);
 
     const renderChart = () => {
-        if (!xAxis || !yAxis) return <div className="flex h-full items-center justify-center text-muted-foreground">Select X and Y axes to generate chart</div>;
+        if (!xAxis || !yAxis) return <div className="flex h-full items-center justify-center text-muted-foreground">{t('visualizer.selectAxes')}</div>;
 
         const CommonProps = {
             data: data,
@@ -128,7 +130,7 @@ export function DataVisualizer({ data, columns }: Props) {
         <div className="flex flex-col h-full gap-4 p-4 animate-in fade-in zoom-in-95 duration-300">
             <Card className="p-4 flex flex-wrap gap-4 items-center bg-muted/30 border-none shadow-inner">
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Chart Type</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('visualizer.chartType')}</span>
                     <div className="flex gap-1 bg-background rounded-lg p-1 border shadow-sm">
                         <Button
                             variant={chartType === 'bar' ? 'secondary' : 'ghost'}
@@ -168,10 +170,10 @@ export function DataVisualizer({ data, columns }: Props) {
                 <div className="w-px h-8 bg-border/50 mx-2" />
 
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">X Axis</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('visualizer.xAxis')}</span>
                     <Select value={xAxis} onValueChange={setXAxis}>
                         <SelectTrigger className="w-[180px] h-8 text-xs font-mono bg-background">
-                            <SelectValue placeholder="Select Column" />
+                            <SelectValue placeholder={t('visualizer.selectColumn')} />
                         </SelectTrigger>
                         <SelectContent>
                             {columns.map(col => (
@@ -184,10 +186,10 @@ export function DataVisualizer({ data, columns }: Props) {
                 </div>
 
                 <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">Y Axis (Value)</span>
+                    <span className="text-xs font-bold uppercase tracking-widest text-muted-foreground">{t('visualizer.yAxis')}</span>
                     <Select value={yAxis} onValueChange={setYAxis}>
                         <SelectTrigger className="w-[180px] h-8 text-xs font-mono bg-background">
-                            <SelectValue placeholder="Select Column" />
+                            <SelectValue placeholder={t('visualizer.selectColumn')} />
                         </SelectTrigger>
                         <SelectContent>
                             {columns.map(col => (

@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import Editor, { loader, Monaco } from '@monaco-editor/react';
 import { Button } from '@/components/ui/button';
 import { Play, Sparkles, Code2, Trash2, History, Clock, AlignLeft } from 'lucide-react';
@@ -26,6 +27,7 @@ interface Props {
 }
 
 export function QueryEditor({ value, onChange, onExecute, loading, schema }: Props) {
+    const { t } = useTranslation();
     const { resolvedTheme } = useTheme();
     const [monacoInstance, setMonacoInstance] = useState<Monaco | null>(null);
     const [historyOpen, setHistoryOpen] = useState(false);
@@ -334,11 +336,11 @@ export function QueryEditor({ value, onChange, onExecute, loading, schema }: Pro
             <div className="h-10 border-b flex items-center justify-between px-3 shrink-0 bg-muted/20">
                 <div className="flex items-center gap-3">
                     <Badge variant="outline" className="h-5 px-1.5 font-mono text-[9px] bg-background border-primary/30 text-primary uppercase tracking-tighter">
-                        SQL MODE
+                        {t('queryEditor.sqlMode')}
                     </Badge>
                     <div className="flex items-center gap-2 text-[10px] text-muted-foreground font-medium uppercase tracking-tight">
                         <Code2 size={12} className="text-muted-foreground/60" />
-                        Console
+                        {t('queryEditor.console')}
                     </div>
                 </div>
 
@@ -349,28 +351,28 @@ export function QueryEditor({ value, onChange, onExecute, loading, schema }: Pro
                                 variant="ghost"
                                 size="icon"
                                 className="h-7 w-7 text-muted-foreground hover:text-foreground"
-                                title="Query History"
+                                title={t('queryEditor.queryHistory')}
                             >
                                 <History size={14} />
                             </Button>
                         </PopoverTrigger>
                         <PopoverContent align="end" className="w-[400px] p-0 bg-card border-border shadow-xl">
                             <div className="h-9 border-b px-3 flex items-center justify-between bg-muted/30">
-                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">Execution History</span>
+                                <span className="text-[10px] font-black uppercase tracking-widest text-muted-foreground">{t('queryEditor.history')}</span>
                                 <Button
                                     variant="ghost"
                                     size="sm"
                                     className="h-6 text-[9px] hover:text-destructive"
                                     onClick={() => setQueryHistory([])}
                                 >
-                                    Clear
+                                    {t('queryEditor.clear')}
                                 </Button>
                             </div>
                             <ScrollArea className="h-[300px]">
                                 <div className="p-1">
                                     {queryHistory.length === 0 && (
                                         <div className="p-8 text-center text-muted-foreground opacity-50 text-[10px] uppercase font-bold tracking-widest">
-                                            No History
+                                            {t('queryEditor.noHistory')}
                                         </div>
                                     )}
                                     {queryHistory.map((q, i) => (
@@ -400,7 +402,7 @@ export function QueryEditor({ value, onChange, onExecute, loading, schema }: Pro
                         size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-primary"
                         onClick={handleFormat}
-                        title="Format SQL (Cmd+Shift+F)"
+                        title={t('queryEditor.formatSql')}
                     >
                         <AlignLeft size={14} />
                     </Button>
@@ -410,7 +412,7 @@ export function QueryEditor({ value, onChange, onExecute, loading, schema }: Pro
                         size="icon"
                         className="h-7 w-7 text-muted-foreground hover:text-destructive"
                         onClick={() => onChange('')}
-                        title="Clear Console"
+                        title={t('queryEditor.clearConsole')}
                     >
                         <Trash2 size={14} />
                     </Button>
@@ -426,7 +428,7 @@ export function QueryEditor({ value, onChange, onExecute, loading, schema }: Pro
                         ) : (
                             <>
                                 <Play className="mr-1.5 h-3.5 w-3.5" />
-                                EXECUTE
+                                {t('queryEditor.execute')}
                             </>
                         )}
                         <kbd className="ml-2 pointer-events-none inline-flex h-4 select-none items-center gap-1 rounded border bg-primary-foreground/10 px-1 font-mono text-[9px] font-medium opacity-100">

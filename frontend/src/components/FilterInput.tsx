@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from 'react-i18next';
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -42,15 +43,16 @@ interface FilterInputProps {
 }
 
 const OPERATORS = [
-    { label: "Contains", value: "LIKE", icon: Search },
-    { label: "Equals", value: "=", icon: Equal },
-    { label: "Not Equals", value: "!=", icon: ListFilter }, // placeholder icon
-    { label: "Greater Than", value: ">", icon: ChevronRight },
-    { label: "Less Than", value: "<", icon: ChevronLeft },
-    { label: "Starts With", value: "START", icon: AlignLeft },
+    { label: "contains", value: "LIKE", icon: Search },
+    { label: "equals", value: "=", icon: Equal },
+    { label: "notEquals", value: "!=", icon: ListFilter }, // placeholder icon
+    { label: "greaterThan", value: ">", icon: ChevronRight },
+    { label: "lessThan", value: "<", icon: ChevronLeft },
+    { label: "startsWith", value: "START", icon: AlignLeft },
 ];
 
 export function FilterInput({ database, table, colName, value, onChange, onKeyDown, className }: FilterInputProps) {
+    const { t } = useTranslation();
     const [suggestions, setSuggestions] = useState<string[]>([]);
     const [loading, setLoading] = useState(false);
     const [open, setOpen] = useState(false);
@@ -68,7 +70,7 @@ export function FilterInput({ database, table, colName, value, onChange, onKeyDo
             setSuggestions(vals || []);
         } catch (err) {
             console.error("Failed to fetch distinct values:", err);
-            toast.error("Could not fetch suggestions");
+            toast.error(t('filters.suggestionsError'));
         } finally {
             setLoading(false);
         }
@@ -114,7 +116,7 @@ export function FilterInput({ database, table, colName, value, onChange, onKeyDo
                     {OPERATORS.map((op) => (
                         <DropdownMenuItem key={op.value} onClick={() => handleSelectOperator(op.value)} className="text-[10px] gap-2">
                             <op.icon size={12} className="text-muted-foreground" />
-                            <span>{op.label}</span>
+                            <span>{t(`filters.operators.${op.label}`)}</span>
                             {op.value === currentOp.value && <Check size={10} className="ml-auto" />}
                         </DropdownMenuItem>
                     ))}
@@ -142,16 +144,16 @@ export function FilterInput({ database, table, colName, value, onChange, onKeyDo
                 </PopoverTrigger>
                 <PopoverContent className="p-0 w-48" align="start" side="bottom">
                     <Command className="w-full">
-                        <CommandInput placeholder={`Search ${colName}...`} className="h-8 text-xs" />
+                        <CommandInput placeholder={t('common.search', { item: colName })} className="h-8 text-xs" />
                         <CommandList>
                             <CommandEmpty className="py-2 text-center text-xs text-muted-foreground">
                                 {loading ? (
                                     <div className="flex items-center justify-center gap-2">
-                                        <Loader2 size={12} className="animate-spin" /> Loading...
+                                        <Loader2 size={12} className="animate-spin" /> {t('common.loading')}
                                     </div>
-                                ) : "No values found."}
+                                ) : t('filters.noValues')}
                             </CommandEmpty>
-                            <CommandGroup heading="Distinct Values" className="max-h-48 overflow-y-auto">
+                            <CommandGroup heading={t('filters.distinctValues')} className="max-h-48 overflow-y-auto">
                                 {!loading && suggestions.map((s, idx) => (
                                     <CommandItem
                                         key={idx}

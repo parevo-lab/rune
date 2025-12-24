@@ -1,5 +1,7 @@
 import React from 'react';
 import { ConnectionConfig, SavedConnection } from '../types';
+import { useTranslation } from 'react-i18next';
+import { LanguageSwitcher } from './LanguageSwitcher';
 import {
     Plus,
     Settings2,
@@ -57,6 +59,8 @@ export function ConnectionSidebar({
     activeName,
     onGoToHub
 }: Props) {
+    const { t } = useTranslation();
+
     return (
         <div className="flex flex-col h-full bg-card/30 backdrop-blur-xl border-r">
             {/* Sidebar Header */}
@@ -65,16 +69,20 @@ export function ConnectionSidebar({
                     <div className="w-6 h-6 rounded-lg bg-primary/10 flex items-center justify-center">
                         <Server size={12} className="text-primary" />
                     </div>
-                    <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/80">Instances</h3>
+                    <h3 className="text-[10px] font-black uppercase tracking-widest text-primary/80">{t('sidebar.connections')}</h3>
                 </div>
-                <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 rounded-lg hover:bg-primary/10 hover:text-primary transition-all"
-                    onClick={() => onOpenModal()}
-                >
-                    <Plus size={16} />
-                </Button>
+                <div className="flex items-center gap-1">
+                    <LanguageSwitcher />
+                    <Button
+                        variant="ghost"
+                        size="icon"
+                        className="h-7 w-7 rounded-lg hover:bg-primary/10 hover:text-primary transition-all"
+                        onClick={() => onOpenModal()}
+                        title={t('sidebar.addConnection')}
+                    >
+                        <Plus size={16} />
+                    </Button>
+                </div>
             </div>
 
             {/* Active Connection Section */}
@@ -82,14 +90,14 @@ export function ConnectionSidebar({
                 <div className="p-3 animate-in slide-in-from-left duration-300">
                     <div className="rounded-xl border border-primary/20 bg-primary/5 p-3 space-y-3 relative overflow-hidden group">
                         <div className="absolute top-0 right-0 p-1 opacity-20 group-hover:opacity-100 transition-opacity">
-                            <Badge variant="outline" className="text-[8px] bg-background border-primary/20">LIVE</Badge>
+                            <Badge variant="outline" className="text-[8px] bg-background border-primary/20">{t('sidebar.live')}</Badge>
                         </div>
                         <div className="space-y-1">
                             <p className="text-[11px] font-black uppercase tracking-tight truncate flex items-center gap-2">
                                 <span className="w-1.5 h-1.5 rounded-full bg-green-500 shadow-[0_0_8px_rgba(34,197,94,0.6)]" />
-                                {activeName || "Active Server"}
+                                {activeName || t('sidebar.activeServer')}
                             </p>
-                            <p className="text-[9px] text-muted-foreground font-mono opacity-60">Engine Authenticated</p>
+                            <p className="text-[9px] text-muted-foreground font-mono opacity-60">{t('sidebar.engineAuthenticated')}</p>
                         </div>
                         <Button
                             variant="destructive"
@@ -98,7 +106,7 @@ export function ConnectionSidebar({
                             onClick={onDisconnect}
                         >
                             <Unplug size={12} className="mr-2" />
-                            Kill Signal
+                            {t('sidebar.killSignal')}
                         </Button>
                     </div>
                 </div>
@@ -109,7 +117,7 @@ export function ConnectionSidebar({
                 <div className="relative group">
                     <Search className="absolute left-2 top-2 h-3 w-3 text-muted-foreground/40 group-focus-within:text-primary transition-colors" />
                     <Input
-                        placeholder="Filter servers..."
+                        placeholder={t('sidebar.searchTables')}
                         className="h-7 pl-7 text-[10px] bg-background/50 border-muted-foreground/10 focus-visible:ring-primary/20 focus-visible:border-primary/40 transition-all font-bold tracking-tight"
                     />
                 </div>
@@ -121,7 +129,7 @@ export function ConnectionSidebar({
             <ScrollArea className="flex-1">
                 <div className="p-2 space-y-1">
                     <div className="px-2 py-1 mb-1 flex items-center justify-between">
-                        <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">Workspace</p>
+                        <p className="text-[9px] font-black text-muted-foreground/40 uppercase tracking-widest">{t('sidebar.workspace')}</p>
                         <Badge variant="secondary" className="h-3 text-[7px] px-1 font-black leading-none bg-muted-foreground/10 text-muted-foreground/60">{savedConnections.length}</Badge>
                     </div>
                     {savedConnections.map((conn) => (
@@ -165,8 +173,8 @@ export function ConnectionSidebar({
                     {savedConnections.length === 0 && (
                         <div className="text-center py-12 px-4 opacity-30 select-none">
                             <Hexagon size={24} className="mx-auto mb-2 opacity-20" />
-                            <p className="text-[10px] font-black uppercase tracking-widest">No nodes found</p>
-                            <Button variant="ghost" size="sm" className="h-6 text-[8px] font-black uppercase mt-3 hover:bg-primary/5" onClick={() => onOpenModal()}>Initialize One</Button>
+                            <p className="text-[10px] font-black uppercase tracking-widest">{t('sidebar.noConnections')}</p>
+                            <Button variant="ghost" size="sm" className="h-6 text-[8px] font-black uppercase mt-3 hover:bg-primary/5" onClick={() => onOpenModal()}>{t('sidebar.addConnection')}</Button>
                         </div>
                     )}
                 </div>
@@ -180,7 +188,7 @@ export function ConnectionSidebar({
                     onClick={onGoToHub}
                 >
                     <LayoutGrid size={14} />
-                    Engine Hub
+                    {t('sidebar.engineHub')}
                 </Button>
             </div>
         </div>

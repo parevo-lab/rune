@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import {
     Dialog,
     DialogContent,
@@ -25,6 +26,7 @@ interface Props {
 }
 
 export function UpdateModal({ updateInfo, onClose }: Props) {
+    const { t } = useTranslation();
     const [updating, setUpdating] = useState(false);
     const [completed, setCompleted] = useState(false);
     const [error, setError] = useState<string | null>(null);
@@ -59,9 +61,9 @@ export function UpdateModal({ updateInfo, onClose }: Props) {
                         </div>
                         <div>
                             <DialogTitle className="text-lg font-black tracking-tight uppercase italic flex items-center gap-2">
-                                Update Available
+                                {t('updateModal.updateAvailable')}
                                 <Badge variant="secondary" className="text-[9px] bg-primary text-primary-foreground h-4 px-1.5 border-none font-black italic">
-                                    NEW
+                                    {t('updateModal.new')}
                                 </Badge>
                             </DialogTitle>
                             <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-widest leading-none mt-1 opacity-60">
@@ -74,7 +76,7 @@ export function UpdateModal({ updateInfo, onClose }: Props) {
                 <div className="p-6 space-y-4">
                     <div className="bg-muted/30 rounded-xl border border-border/40 p-4 max-h-[150px] overflow-y-auto">
                         <h4 className="text-[10px] font-black uppercase text-muted-foreground mb-2 tracking-widest flex items-center gap-2">
-                            Release Notes
+                            {t('updateModal.releaseNotes')}
                         </h4>
                         <div className="text-[11px] font-bold text-foreground/80 leading-relaxed whitespace-pre-wrap">
                             {updateInfo.releaseNotes || "Performance improvements and bug fixes."}
@@ -83,14 +85,14 @@ export function UpdateModal({ updateInfo, onClose }: Props) {
 
                     {error && (
                         <div className="p-3 rounded-lg bg-destructive/10 border border-destructive/20 text-destructive text-[10px] font-bold uppercase tracking-wider text-center">
-                            Error: {error}
+                            {t('updateModal.error', { error })}
                         </div>
                     )}
 
                     {updating && !completed && (
                         <div className="space-y-3 py-2">
                             <div className="flex justify-between items-center text-[10px] font-black uppercase tracking-widest text-primary">
-                                <span>Downloading & Patching...</span>
+                                <span>{t('updateModal.downloading')}</span>
                             </div>
                             <div className="h-1.5 w-full bg-muted rounded-full overflow-hidden">
                                 <div className="h-full bg-primary animate-progress-indeterminate" />
@@ -100,8 +102,8 @@ export function UpdateModal({ updateInfo, onClose }: Props) {
 
                     {completed && (
                         <div className="p-4 rounded-xl bg-green-500/10 border border-green-500/20 text-green-500 text-center space-y-2">
-                            <p className="text-[11px] font-black uppercase tracking-widest">Update Applied Successfully!</p>
-                            <p className="text-[10px] font-bold opacity-80 uppercase leading-tight">Ready to launch the new version.</p>
+                            <p className="text-[11px] font-black uppercase tracking-widest">{t('updateModal.successTitle')}</p>
+                            <p className="text-[10px] font-bold opacity-80 uppercase leading-tight">{t('updateModal.successDesc')}</p>
                         </div>
                     )}
                 </div>
@@ -115,7 +117,7 @@ export function UpdateModal({ updateInfo, onClose }: Props) {
                                 onClick={onClose}
                                 disabled={updating}
                             >
-                                Not Now
+                                {t('updateModal.notNow')}
                             </Button>
                             <Button
                                 className="flex-1 h-9 text-[10px] font-black uppercase tracking-widest shadow-lg shadow-primary/20 bg-primary hover:bg-primary/90 text-primary-foreground"
@@ -123,7 +125,7 @@ export function UpdateModal({ updateInfo, onClose }: Props) {
                                 disabled={updating}
                             >
                                 <Download size={14} className="mr-2" />
-                                {updating ? "Updating..." : "Update Now"}
+                                {updating ? t('updateModal.updating') : t('updateModal.updateNow')}
                             </Button>
                         </>
                     ) : (
@@ -132,7 +134,7 @@ export function UpdateModal({ updateInfo, onClose }: Props) {
                             onClick={handleRestart}
                         >
                             <Rocket size={14} className="mr-2" />
-                            RELAUNCH APP
+                            {t('updateModal.relaunch')}
                         </Button>
                     )}
                 </DialogFooter>

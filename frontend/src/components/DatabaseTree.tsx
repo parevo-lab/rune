@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from 'react-i18next';
 import { TableInfo, ColumnInfo, DatabaseInfo } from '../types';
 import {
     ChevronRight,
@@ -40,6 +41,7 @@ export function DatabaseTree({
     onSelectTable,
     connected
 }: Props) {
+    const { t } = useTranslation();
     const [nodes, setNodes] = useState<TreeNode[]>([]);
     const [filter, setFilter] = useState('');
 
@@ -176,8 +178,8 @@ export function DatabaseTree({
                 <div className="w-12 h-12 rounded-full bg-muted/20 flex items-center justify-center mb-4 text-muted-foreground/30">
                     <DatabaseIcon size={24} />
                 </div>
-                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50">Explorer</p>
-                <p className="text-[11px] text-muted-foreground mt-1">Connect to a database to browse schema</p>
+                <p className="text-xs font-semibold uppercase tracking-wider text-muted-foreground/50">{t('databaseTree.explorer')}</p>
+                <p className="text-[11px] text-muted-foreground mt-1">{t('databaseTree.connectPrompt')}</p>
             </div>
         );
     }
@@ -186,7 +188,7 @@ export function DatabaseTree({
         <div className="flex flex-col h-full bg-card/30">
             <div className="p-3 pb-2 flex items-center justify-between">
                 <h3 className="text-[10px] font-bold uppercase tracking-widest text-muted-foreground flex items-center gap-2">
-                    Schema Browser
+                    {t('databaseTree.schemaBrowser')}
                     <Badge variant="secondary" className="px-1.5 py-0 h-4 text-[9px] font-bold bg-muted/50 border-none">{databases.length}</Badge>
                 </h3>
                 <Button variant="ghost" size="icon" className="h-5 w-5 text-muted-foreground hover:text-foreground">
@@ -199,7 +201,7 @@ export function DatabaseTree({
                     <Search className="absolute left-2 top-1.5 h-3.5 w-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
                     <Input
                         className="h-7 pl-7 text-[11px] bg-background/50 border-muted-foreground/20 focus-visible:ring-1 focus-visible:ring-primary/30 h-8"
-                        placeholder="Search databases/tables..."
+                        placeholder={t('databaseTree.searchPlaceholder')}
                         value={filter}
                         onChange={(e) => setFilter(e.target.value)}
                     />

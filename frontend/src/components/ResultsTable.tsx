@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { QueryResult } from '../types';
 import {
     AlertCircle,
@@ -75,7 +76,7 @@ const formatJSON = (val: string): string => {
 };
 
 // Copy helpers
-const copyAsCSV = (rows: any[][], columns: string[]) => {
+const copyAsCSV = (rows: any[][], columns: string[], t: any) => {
     const header = columns.join(',');
     const data = rows.map(row =>
         row.map(cell => {
@@ -87,10 +88,10 @@ const copyAsCSV = (rows: any[][], columns: string[]) => {
         }).join(',')
     ).join('\n');
     navigator.clipboard.writeText(`${header}\n${data}`);
-    toast.success('Copied as CSV');
+    toast.success(t('resultsTable.copiedToClipboard'));
 };
 
-const copyAsJSON = (rows: any[][], columns: string[]) => {
+const copyAsJSON = (rows: any[][], columns: string[], t: any) => {
     const data = rows.map(row => {
         const obj: Record<string, any> = {};
         columns.forEach((col, i) => {
@@ -99,10 +100,10 @@ const copyAsJSON = (rows: any[][], columns: string[]) => {
         return obj;
     });
     navigator.clipboard.writeText(JSON.stringify(data, null, 2));
-    toast.success('Copied as JSON');
+    toast.success(t('resultsTable.copiedToClipboard'));
 };
 
-const copyAsSQLInsert = (rows: any[][], columns: string[], tableName: string = 'table_name') => {
+const copyAsSQLInsert = (rows: any[][], columns: string[], t: any, tableName: string = 'table_name') => {
     const inserts = rows.map(row => {
         const values = row.map(cell => {
             if (cell === null) return 'NULL';
@@ -112,11 +113,11 @@ const copyAsSQLInsert = (rows: any[][], columns: string[], tableName: string = '
         return `INSERT INTO ${tableName} (${columns.join(', ')}) VALUES (${values});`;
     }).join('\n');
     navigator.clipboard.writeText(inserts);
-    toast.success('Copied as SQL INSERT');
+    toast.success(t('resultsTable.copiedToClipboard'));
 };
 
 export function ResultsTable({ results, result, error }: Props) {
-    // Unify input to array
+    const { t } = useTranslation();
     const data = results || (result ? [result] : []);
     const [activeIndex, setActiveIndex] = useState(0);
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
@@ -245,8 +246,8 @@ export function ResultsTable({ results, result, error }: Props) {
                         </div>
                         <div className="space-y-2">
                             <h3 className="text-sm font-bold text-destructive uppercase tracking-widest flex items-center gap-2">
-                                Execution Failed
-                                <Badge variant="destructive" className="h-4 text-[9px] px-1 font-bold">SQL Error</Badge>
+                                {t('resultsTable.executionFailed')}
+                                <Badge variant="destructive" className="h-4 text-[9px] px-1 font-bold">{t('resultsTable.sqlError')}</Badge>
                             </h3>
                             <pre className="text-[12px] font-mono whitespace-pre-wrap text-muted-foreground leading-relaxed bg-black/20 p-4 rounded-lg border border-destructive/10">
                                 {error}
@@ -265,8 +266,8 @@ export function ResultsTable({ results, result, error }: Props) {
                     <Terminal size={32} />
                 </div>
                 <div className="text-center">
-                    <p className="text-xs font-bold uppercase tracking-[0.2em]">Execution Console</p>
-                    <p className="text-[11px] mt-1 font-medium">Results will appear here after execution</p>
+                    <p className="text-xs font-bold uppercase tracking-[0.2em]">{t('resultsTable.executionConsole')}</p>
+                    <p className="text-[11px] mt-1 font-medium">{t('resultsTable.consoleSubtitle')}</p>
                 </div>
             </div>
         );
@@ -278,7 +279,7 @@ export function ResultsTable({ results, result, error }: Props) {
                 <div className="flex items-center gap-4 text-[10px] font-bold uppercase text-muted-foreground tracking-widest overflow-hidden">
                     <div className="flex items-center gap-1.5 shrink-0">
                         <TableIcon size={12} className="text-primary/60" />
-                        Query Results
+                        {t('resultsTable.queryResults')}
                     </div>
 
                     {data.length > 1 && (
@@ -295,7 +296,7 @@ export function ResultsTable({ results, result, error }: Props) {
                                             : "bg-transparent text-muted-foreground border-transparent hover:bg-muted/20"
                                     )}
                                 >
-                                    Result {idx + 1}
+                                    {t('resultsTable.result')} {idx + 1}
                                 </button>
                             ))}
                         </div>
@@ -311,7 +312,7 @@ export function ResultsTable({ results, result, error }: Props) {
                         <>
                             <Separator orientation="vertical" className="h-3" />
                             <div className="flex items-center gap-1.5 text-primary">
-                                {selectedRows.size} selected
+                                {selectedRows.size} {t('resultsTable.rowsSelected')}
                             </div>
                         </>
                     )}
@@ -319,10 +320,10 @@ export function ResultsTable({ results, result, error }: Props) {
                 <div className="flex items-center gap-2">
                     {rows.length > 100 && (
                         <Badge variant="outline" className="text-[8px] font-mono font-bold border-green-500/30 text-green-500">
-                            VIRTUAL
+                            {t('resultsTable.virtual')}
                         </Badge>
                     )}
-                    <Badge variant="secondary" className="text-[9px] font-mono font-bold border-none bg-primary/10 text-primary">SCANNED</Badge>
+                    <Badge variant="secondary" className="text-[9px] font-mono font-bold border-none bg-primary/10 text-primary">{t('resultsTable.scanned')}</Badge>
                 </div>
             </div>
 
@@ -368,7 +369,7 @@ export function ResultsTable({ results, result, error }: Props) {
                                                         "h-6 text-[10px] px-2 py-0 bg-background/50 focus:bg-background border-muted-foreground/20 font-mono transition-all",
                                                         filters[i] ? "border-primary/50 bg-primary/5 text-primary" : ""
                                                     )}
-                                                    placeholder="Filter..."
+                                                    placeholder={t('common.filter') + "..."}
                                                     value={filters[i] || ''}
                                                     onChange={(e) => {
                                                         const val = e.target.value;
@@ -463,26 +464,26 @@ export function ResultsTable({ results, result, error }: Props) {
                     </div>
                 </ContextMenuTrigger>
                 <ContextMenuContent className="w-56">
-                    <ContextMenuItem onClick={() => copyAsCSV(getSelectedRowsData(), columns)}>
+                    <ContextMenuItem onClick={() => copyAsCSV(getSelectedRowsData(), columns, t)}>
                         <FileText className="mr-2 h-4 w-4" />
-                        Copy as CSV
+                        {t('resultsTable.copyAsCSV')}
                     </ContextMenuItem>
-                    <ContextMenuItem onClick={() => copyAsJSON(getSelectedRowsData(), columns)}>
+                    <ContextMenuItem onClick={() => copyAsJSON(getSelectedRowsData(), columns, t)}>
                         <FileJson className="mr-2 h-4 w-4" />
-                        Copy as JSON
+                        {t('resultsTable.copyAsJSON')}
                     </ContextMenuItem>
-                    <ContextMenuItem onClick={() => copyAsSQLInsert(getSelectedRowsData(), columns)}>
+                    <ContextMenuItem onClick={() => copyAsSQLInsert(getSelectedRowsData(), columns, t)}>
                         <Database className="mr-2 h-4 w-4" />
-                        Copy as SQL INSERT
+                        {t('resultsTable.copyAsSQL')}
                     </ContextMenuItem>
                     <ContextMenuSeparator />
                     <ContextMenuItem onClick={() => {
                         const text = getSelectedRowsData().map(row => row.join('\t')).join('\n');
                         navigator.clipboard.writeText(text);
-                        toast.success('Copied to clipboard');
+                        toast.success(t('resultsTable.copiedToClipboard'));
                     }}>
                         <Copy className="mr-2 h-4 w-4" />
-                        Copy Raw
+                        {t('resultsTable.copyRaw')}
                     </ContextMenuItem>
                 </ContextMenuContent>
             </ContextMenu>
@@ -493,7 +494,7 @@ export function ResultsTable({ results, result, error }: Props) {
                     <DialogHeader>
                         <DialogTitle className="flex items-center gap-2 text-sm font-bold uppercase tracking-widest">
                             <FileJson className="h-4 w-4 text-blue-500" />
-                            JSON Preview
+                            {t('resultsTable.jsonPreview')}
                         </DialogTitle>
                     </DialogHeader>
                     <div className="flex-1 overflow-auto">
