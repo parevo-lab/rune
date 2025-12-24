@@ -31,7 +31,7 @@ func (u *Updater) SetContext(ctx context.Context) {
 }
 
 func (u *Updater) CheckForUpdate(currentVersion string) (*UpdateInfo, error) {
-	slug := selfupdate.ParseSlug("parevo-lab/mergen")
+	slug := selfupdate.ParseSlug("parevo/mergen")
 
 	updater, err := selfupdate.NewUpdater(selfupdate.Config{
 		Filters:       []string{"^mergen_"},
