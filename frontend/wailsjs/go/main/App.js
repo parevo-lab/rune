@@ -66,6 +66,10 @@ export function GetDatabases() {
   return window['go']['main']['App']['GetDatabases']();
 }
 
+export function GetDistinctValues(arg1, arg2, arg3) {
+  return window['go']['main']['App']['GetDistinctValues'](arg1, arg2, arg3);
+}
+
 export function GetTableData(arg1) {
   return window['go']['main']['App']['GetTableData'](arg1);
 }

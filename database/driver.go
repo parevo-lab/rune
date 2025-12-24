@@ -18,6 +18,7 @@ type Driver interface {
 	// Query Building & Dialect Specifics
 	BuildTableDataQuery(req TableDataRequest, primaryKey string) string
 	BuildCountQuery(database, table, filters string) string
+	BuildDistinctValuesQuery(database, table, column string) string
 
 	// Table Operations
 	BuildAlterTableQuery(database, table string, alteration TableAlteration) ([]string, error)

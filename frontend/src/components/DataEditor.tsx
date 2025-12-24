@@ -23,10 +23,14 @@ import {
     Download,
     ArrowUp,
     ArrowDown,
-    ArrowUpDown
+    ArrowUpDown,
+    FilterX
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
+import { Input } from "@/components/ui/input";
+import { FilterInput } from "./FilterInput";
+import { FilterHistory, addToHistory } from "./FilterHistory";
+import { RawFilterEditor } from "./RawFilterEditor";
 import { Label } from '@/components/ui/label';
 import {
     Table,
@@ -154,12 +158,15 @@ export function DataEditor({ database, table, onClose }: Props) {
         const finalSql = parts.length > 0 ? parts.join(' AND ') : '';
 
         setActiveFilter(finalSql);
+        return finalSql; // Return the computed filter string
     };
 
     const handleGlobalSearchKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
-            applyFilters(columnFilters, globalSearch);
+            const currentFilter = applyFilters(columnFilters, globalSearch);
             setPage(1);
+            loadData();
+            if (currentFilter) addToHistory(table, currentFilter);
         }
     };
 
@@ -172,8 +179,10 @@ export function DataEditor({ database, table, onClose }: Props) {
 
     const handleFilterKeyDown = (e: React.KeyboardEvent) => {
         if (e.key === 'Enter') {
-            applyFilters(columnFilters, globalSearch);
+            const currentFilter = applyFilters(columnFilters, globalSearch);
             setPage(1);
+            loadData();
+            if (currentFilter) addToHistory(table, currentFilter);
         }
     };
 
@@ -204,8 +213,10 @@ export function DataEditor({ database, table, onClose }: Props) {
 
         const newFilters = { ...columnFilters, [colName]: value === null ? 'NULL' : `=${valStr}` };
         setColumnFilters(newFilters);
-        applyFilters(newFilters, globalSearch);
+        const currentFilter = applyFilters(newFilters, globalSearch);
         setPage(1);
+        loadData();
+        if (currentFilter) addToHistory(table, currentFilter);
         toast.success(`Filtered by ${colName} = ${cleanVal}`);
     };
 
@@ -213,8 +224,10 @@ export function DataEditor({ database, table, onClose }: Props) {
         const valStr = value === null ? 'NULL' : String(value);
         const newFilters = { ...columnFilters, [colName]: value === null ? '!NULL' : `!=${valStr}` };
         setColumnFilters(newFilters);
-        applyFilters(newFilters, globalSearch);
+        const currentFilter = applyFilters(newFilters, globalSearch);
         setPage(1);
+        loadData();
+        if (currentFilter) addToHistory(table, currentFilter);
         toast.success(`Excluded ${colName} = ${valStr}`);
     };
 
@@ -500,18 +513,47 @@ export function DataEditor({ database, table, onClose }: Props) {
                     {/* Active Filters Display & Clear */}
                     {activeFilter && (
                         <div className="flex items-center gap-2 mr-2 animate-in fade-in slide-in-from-right-4">
-                            <Badge variant="secondary" className="h-7 px-3 text-[10px] bg-primary/10 text-primary border border-primary/20 flex items-center gap-2">
-                                <Filter size={10} />
-                                <span className="hidden sm:inline">FILTERS ACTIVE</span>
-                                <Separator orientation="vertical" className="h-3 bg-primary/20" />
-                                <span
-                                    className="hover:bg-destructive/10 hover:text-destructive p-0.5 rounded cursor-pointer transition-colors"
-                                    onClick={clearAllFilters}
-                                    title="Clear All Filters"
-                                >
-                                    <X size={12} />
-                                </span>
-                            </Badge>
+                            <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/70 hover:text-primary" onClick={loadData} title="Refresh Data">
+                                <RefreshCcw size={14} />
+                            </Button>
+
+                            <FilterHistory
+                                table={table}
+                                currentFilter={activeFilter}
+                                onSelectFilter={(f) => {
+                                    // When a filter is selected from history, apply it directly as activeFilter
+                                    // This assumes history items are raw SQL WHERE clauses.
+                                    setActiveFilter(f);
+                                    setColumnFilters({}); // Clear column filters
+                                    setGlobalSearch(''); // Clear global search
+                                    setPage(1);
+                                    loadData();
+                                    toast.success("Applied filter from history");
+                                }}
+                            />
+
+                            <RawFilterEditor
+                                currentFilter={activeFilter}
+                                onSave={(f) => {
+                                    setActiveFilter(f);
+                                    setColumnFilters({});
+                                    setGlobalSearch('');
+                                    setPage(1);
+                                    setPage(1);
+                                    // loadData handled by effect
+                                    toast.success("Raw filter applied");
+                                }}
+                            />
+
+                            <Button
+                                variant="ghost"
+                                size="icon"
+                                className={cn("h-7 w-7 text-muted-foreground/70 hover:text-destructive", (Object.keys(columnFilters).length > 0 || globalSearch) ? "opacity-100" : "opacity-30")}
+                                onClick={clearAllFilters}
+                                title="Clear All Filters"
+                            >
+                                <FilterX size={14} />
+                            </Button>
                         </div>
                     )}
 
@@ -688,23 +730,19 @@ export function DataEditor({ database, table, onClose }: Props) {
                                                     <Separator className="bg-border/40" />
 
                                                     {/* Compact Filter Input */}
-                                                    <div className="relative bg-background/50">
-                                                        <Input
+                                                    <div className="relative bg-background/50" onClick={(e) => e.stopPropagation()}>
+                                                        <FilterInput
+                                                            database={database}
+                                                            table={table}
+                                                            colName={col.name}
+                                                            value={columnFilters[col.name] || ''}
+                                                            onChange={(val) => handleColumnFilterChange(col.name, val)}
+                                                            onKeyDown={handleFilterKeyDown}
                                                             className={cn(
-                                                                "h-7 border-0 rounded-none text-[10px] px-2 py-0 bg-transparent focus-visible:ring-0 focus-visible:bg-background transition-all font-mono placeholder:text-muted-foreground/40",
+                                                                "h-7 border-0 rounded-none text-[10px] bg-transparent focus-within:bg-background transition-all font-mono",
                                                                 columnFilters[col.name] && "text-primary font-medium bg-primary/5"
                                                             )}
-                                                            placeholder="..."
-                                                            value={columnFilters[col.name] || ''}
-                                                            onChange={(e) => handleColumnFilterChange(col.name, e.target.value)}
-                                                            onKeyDown={handleFilterKeyDown}
-                                                            onClick={(e) => e.stopPropagation()}
                                                         />
-                                                        {columnFilters[col.name] && (
-                                                            <div className="absolute right-1 top-1/2 -translate-y-1/2 pointer-events-none">
-                                                                <Filter size={8} className="text-primary opacity-50" />
-                                                            </div>
-                                                        )}
                                                     </div>
                                                 </div>
                                             </TableHead>

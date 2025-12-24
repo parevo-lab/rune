@@ -164,6 +164,11 @@ func (a *App) DeleteRows(dbName, table, primaryKey string, primaryValues []inter
 	return a.db.DeleteRows(dbName, table, primaryKey, primaryValues)
 }
 
+// GetDistinctValues returns distinct values for a column to support frontend auto-completion
+func (a *App) GetDistinctValues(dbName, table, column string) ([]string, error) {
+	return a.db.GetDistinctValues(dbName, table, column)
+}
+
 // AlterTable performs schema modifications on a table
 func (a *App) AlterTable(dbName, table string, alteration database.TableAlteration) error {
 	return a.db.AlterTable(dbName, table, alteration)

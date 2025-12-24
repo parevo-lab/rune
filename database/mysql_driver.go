@@ -325,3 +325,8 @@ func (d *MySQLDriver) BuildBatchDeleteQuery(database, table, primaryKey string, 
 func (d *MySQLDriver) QuoteIdentifier(name string) string {
 	return fmt.Sprintf("`%s`", name)
 }
+
+func (d *MySQLDriver) BuildDistinctValuesQuery(database, table, column string) string {
+	return fmt.Sprintf("SELECT DISTINCT `%s` FROM `%s`.`%s` ORDER BY `%s` LIMIT 100",
+		column, database, table, column)
+}

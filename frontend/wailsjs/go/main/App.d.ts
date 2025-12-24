@@ -34,6 +34,8 @@ export function GetDatabaseSchema(arg1:string):Promise<Record<string, Array<stri
 
 export function GetDatabases():Promise<Array<database.DatabaseInfo>>;
 
+export function GetDistinctValues(arg1:string,arg2:string,arg3:string):Promise<Array<string>>;
+
 export function GetTableData(arg1:database.TableDataRequest):Promise<database.TableDataResponse>;
 
 export function GetTableInfo(arg1:string,arg2:string):Promise<database.TableDetails>;

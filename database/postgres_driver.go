@@ -196,3 +196,8 @@ func (d *PostgresDriver) BuildBatchDeleteQuery(database, table, primaryKey strin
 func (d *PostgresDriver) QuoteIdentifier(name string) string {
 	return fmt.Sprintf("\"%s\"", name)
 }
+
+func (d *PostgresDriver) BuildDistinctValuesQuery(database, table, column string) string {
+	return fmt.Sprintf("SELECT DISTINCT %s FROM %s ORDER BY %s LIMIT 100",
+		d.QuoteIdentifier(column), d.QuoteIdentifier(table), d.QuoteIdentifier(column))
+}

@@ -206,3 +206,40 @@ func (m *Manager) DeleteRows(database, table, primaryKey string, primaryValues [
 		RowsAffected: rowsAffected,
 	}, nil
 }
+
+// GetDistinctValues returns distinct values for a column
+func (m *Manager) GetDistinctValues(database, table, column string) ([]string, error) {
+	db := m.getDB()
+	if db == nil {
+		return nil, fmt.Errorf("not connected to database")
+	}
+
+	query := m.driver.BuildDistinctValuesQuery(database, table, column)
+	rows, err := db.Query(query)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var values []string
+	for rows.Next() {
+		var val interface{}
+		if err := rows.Scan(&val); err != nil {
+			return nil, err
+		}
+
+		if val == nil {
+			values = append(values, "NULL")
+			continue
+		}
+
+		// Handle data types
+		switch v := val.(type) {
+		case []byte:
+			values = append(values, string(v))
+		default:
+			values = append(values, fmt.Sprintf("%v", v))
+		}
+	}
+	return values, nil
+}
