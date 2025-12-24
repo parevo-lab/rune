@@ -148,7 +148,64 @@ func (d *PostgresDriver) BuildCountQuery(database, table, filters string) string
 }
 
 func (d *PostgresDriver) BuildAlterTableQuery(database, table string, alteration TableAlteration) ([]string, error) {
-	return nil, fmt.Errorf("alter table not implemented for postgres yet")
+	var statements []string
+	quotedTable := d.QuoteIdentifier(table)
+
+	// Rename table if requested
+	if alteration.RenameTo != "" && alteration.RenameTo != table {
+		statements = append(statements, fmt.Sprintf("ALTER TABLE %s RENAME TO %s", quotedTable, d.QuoteIdentifier(alteration.RenameTo)))
+		quotedTable = d.QuoteIdentifier(alteration.RenameTo)
+	}
+
+	// Drop columns
+	for _, col := range alteration.DropColumns {
+		statements = append(statements, fmt.Sprintf("ALTER TABLE %s DROP COLUMN %s", quotedTable, d.QuoteIdentifier(col)))
+	}
+
+	// Add columns
+	for _, col := range alteration.AddColumns {
+		nullStr := "NOT NULL"
+		if col.Nullable {
+			nullStr = "NULL"
+		}
+		defaultStr := ""
+		if col.Default != "" {
+			defaultStr = fmt.Sprintf(" DEFAULT '%s'", col.Default)
+		}
+		statements = append(statements, fmt.Sprintf("ALTER TABLE %s ADD COLUMN %s %s %s%s",
+			quotedTable, d.QuoteIdentifier(col.Name), col.Type, nullStr, defaultStr))
+	}
+
+	// Modify columns
+	for _, col := range alteration.ModifyColumns {
+		quotedCol := d.QuoteIdentifier(col.Name)
+
+		// Rename column if oldName is present and different
+		if col.OldName != "" && col.OldName != col.Name {
+			statements = append(statements, fmt.Sprintf("ALTER TABLE %s RENAME COLUMN %s TO %s",
+				quotedTable, d.QuoteIdentifier(col.OldName), quotedCol))
+		}
+
+		// Type change
+		statements = append(statements, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s TYPE %s USING %s::%s",
+			quotedTable, quotedCol, col.Type, quotedCol, col.Type))
+
+		// Nullable change
+		if col.Nullable {
+			statements = append(statements, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s DROP NOT NULL", quotedTable, quotedCol))
+		} else {
+			statements = append(statements, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s SET NOT NULL", quotedTable, quotedCol))
+		}
+
+		// Default change
+		if col.Default != "" {
+			statements = append(statements, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s SET DEFAULT '%s'", quotedTable, quotedCol, col.Default))
+		} else {
+			statements = append(statements, fmt.Sprintf("ALTER TABLE %s ALTER COLUMN %s DROP DEFAULT", quotedTable, quotedCol))
+		}
+	}
+
+	return statements, nil
 }
 
 func (d *PostgresDriver) BuildTruncateTableQuery(database, table string) string {

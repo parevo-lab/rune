@@ -24,13 +24,15 @@ import {
     ArrowUp,
     ArrowDown,
     ArrowUpDown,
-    FilterX
+    FilterX,
+    PieChart
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from "@/components/ui/input";
 import { FilterInput } from "./FilterInput";
 import { FilterHistory, addToHistory } from "./FilterHistory";
 import { RawFilterEditor } from "./RawFilterEditor";
+import { DataVisualizer } from './DataVisualizer';
 import { Label } from '@/components/ui/label';
 import {
     Table,
@@ -111,6 +113,7 @@ export function DataEditor({ database, table, onClose }: Props) {
     const [activeFilter, setActiveFilter] = useState('');
     const [columnFilters, setColumnFilters] = useState<Record<string, string>>({});
     const [globalSearch, setGlobalSearch] = useState('');
+    const [showChart, setShowChart] = useState(false);
 
     // Parse filter value to SQL condition
     const getSqlCondition = (colName: string, value: string): string | null => {
@@ -493,25 +496,28 @@ export function DataEditor({ database, table, onClose }: Props) {
                 </div>
 
                 {/* Global Search Bar - Centered/Flexible */}
-                <div className="flex-1 max-w-md relative group">
-                    <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 transition-colors group-hover:text-primary/70" size={14} />
-                    <Input
-                        placeholder="Search everywhere..."
-                        className="h-8 pl-8 bg-background/50 border-muted-foreground/20 focus-visible:bg-background transition-all text-xs w-full"
-                        value={globalSearch}
-                        onChange={(e) => setGlobalSearch(e.target.value)}
-                        onKeyDown={handleGlobalSearchKeyDown}
-                    />
-                    {globalSearch && (
-                        <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-muted-foreground/50 border border-border px-1 rounded animate-in fade-in pointer-events-none">
-                            ENTER
-                        </div>
-                    )}
-                </div>
+                {!showChart && (
+                    <div className="flex-1 max-w-md relative group">
+                        <Search className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/60 transition-colors group-hover:text-primary/70" size={14} />
+                        <Input
+                            placeholder="Search everywhere..."
+                            className="h-8 pl-8 bg-background/50 border-muted-foreground/20 focus-visible:bg-background transition-all text-xs w-full"
+                            value={globalSearch}
+                            onChange={(e) => setGlobalSearch(e.target.value)}
+                            onKeyDown={handleGlobalSearchKeyDown}
+                        />
+                        {globalSearch && (
+                            <div className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] text-muted-foreground/50 border border-border px-1 rounded animate-in fade-in pointer-events-none">
+                                ENTER
+                            </div>
+                        )}
+                    </div>
+                )}
+                {showChart && <div className="flex-1" />}
 
                 <div className="flex items-center gap-1.5 shrink-0">
                     {/* Active Filters Display & Clear */}
-                    {activeFilter && (
+                    {activeFilter && !showChart && (
                         <div className="flex items-center gap-2 mr-2 animate-in fade-in slide-in-from-right-4">
                             <Button variant="ghost" size="icon" className="h-7 w-7 text-muted-foreground/70 hover:text-primary" onClick={loadData} title="Refresh Data">
                                 <RefreshCcw size={14} />
@@ -521,8 +527,6 @@ export function DataEditor({ database, table, onClose }: Props) {
                                 table={table}
                                 currentFilter={activeFilter}
                                 onSelectFilter={(f) => {
-                                    // When a filter is selected from history, apply it directly as activeFilter
-                                    // This assumes history items are raw SQL WHERE clauses.
                                     setActiveFilter(f);
                                     setColumnFilters({}); // Clear column filters
                                     setGlobalSearch(''); // Clear global search
@@ -558,16 +562,27 @@ export function DataEditor({ database, table, onClose }: Props) {
                     )}
 
                     <Button
-                        variant="outline"
+                        variant={showChart ? "secondary" : "ghost"}
                         size="sm"
-                        className="h-7 px-2.5 text-[10px] font-bold gap-1.5 uppercase hover:bg-primary/5 border-primary/20"
-                        onClick={() => setShowAddRow(true)}
+                        className={cn("h-7 px-2.5 text-[10px] font-bold gap-1.5 uppercase hover:bg-primary/5", showChart ? "bg-primary/10 text-primary border border-primary/20" : "")}
+                        onClick={() => setShowChart(!showChart)}
                     >
-                        <Plus size={14} className="text-primary" />
-                        <span className="hidden sm:inline">ROW</span>
+                        <PieChart size={14} className={showChart ? "text-primary" : "text-muted-foreground"} />
+                        <span className="hidden sm:inline">Visualize</span>
                     </Button>
-
                     <Separator orientation="vertical" className="h-5 mx-0.5" />
+
+                    {!showChart && (
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            className="h-7 px-2.5 text-[10px] font-bold gap-1.5 uppercase hover:bg-primary/5 border-primary/20"
+                            onClick={() => setShowAddRow(true)}
+                        >
+                            <Plus size={14} className="text-primary" />
+                            <span className="hidden sm:inline">ROW</span>
+                        </Button>
+                    )}
 
                     <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -678,200 +693,216 @@ export function DataEditor({ database, table, onClose }: Props) {
                 )
             }
 
-            {/* Main Grid */}
-            <div className="flex-1 overflow-hidden relative">
-                <ContextMenu>
-                    <ContextMenuTrigger asChild>
-                        <ScrollArea className="h-full w-full">
-                            <Table className="border-collapse min-w-full">
-                                <TableHeader className="bg-muted/40 sticky top-0 z-10 shadow-sm border-b-2 border-border/60">
-                                    <TableRow className="border-b shadow-none hover:bg-transparent">
-                                        <TableHead className="w-10 text-center border-r bg-muted/20 p-0 h-auto align-top pt-2">
-                                            <input
-                                                type="checkbox"
-                                                className="w-3 h-3 rounded accent-primary cursor-pointer mx-auto"
-                                                checked={data.rows.length > 0 && selectedRows.size === data.rows.length}
-                                                onChange={(e) => {
-                                                    if (e.target.checked) setSelectedRows(new Set(data.rows.map((_, i) => i)));
-                                                    else setSelectedRows(new Set());
-                                                }}
-                                            />
-                                        </TableHead>
-                                        {data.columns.map((col, i) => (
-                                            <TableHead
-                                                key={i}
-                                                className={cn(
-                                                    "border-r last:border-r-0 text-muted-foreground p-0 h-auto align-top transition-colors hover:bg-muted/50",
-                                                    sortColumn === col.name && "bg-primary/5 text-primary font-bold"
-                                                )}
-                                            >
-                                                <div className="flex flex-col">
-                                                    {/* Header Title Area */}
-                                                    <div
-                                                        className="flex items-center justify-between px-2 py-1.5 cursor-pointer select-none group/header"
-                                                        onClick={() => handleSort(col.name)}
-                                                    >
-                                                        <div className="flex items-center gap-1.5 overflow-hidden">
-                                                            <span className="text-[11px] font-bold uppercase tracking-tight truncate" title={col.name}>
-                                                                {col.name}
-                                                            </span>
-                                                            {col.key === 'PRI' && <div className="w-1 h-1 rounded-full bg-amber-500" title="Primary Key" />}
-                                                        </div>
-
-                                                        <div className="flex items-center text-muted-foreground/30 group-hover/header:text-muted-foreground/80 transition-colors">
-                                                            {sortColumn === col.name ? (
-                                                                sortDirection === 'ASC' ? <ArrowUp size={10} className="text-primary" /> : <ArrowDown size={10} className="text-primary" />
-                                                            ) : (
-                                                                <ArrowUpDown size={10} className="opacity-0 group-hover/header:opacity-100" />
-                                                            )}
-                                                        </div>
-                                                    </div>
-
-                                                    <Separator className="bg-border/40" />
-
-                                                    {/* Compact Filter Input */}
-                                                    <div className="relative bg-background/50" onClick={(e) => e.stopPropagation()}>
-                                                        <FilterInput
-                                                            database={database}
-                                                            table={table}
-                                                            colName={col.name}
-                                                            value={columnFilters[col.name] || ''}
-                                                            onChange={(val) => handleColumnFilterChange(col.name, val)}
-                                                            onKeyDown={handleFilterKeyDown}
-                                                            className={cn(
-                                                                "h-7 border-0 rounded-none text-[10px] bg-transparent focus-within:bg-background transition-all font-mono",
-                                                                columnFilters[col.name] && "text-primary font-medium bg-primary/5"
-                                                            )}
-                                                        />
-                                                    </div>
-                                                </div>
-                                            </TableHead>
-                                        ))}
-                                    </TableRow>
-                                </TableHeader>
-                                <TableBody>
-                                    {data.rows.map((row, rowIndex) => (
-                                        <TableRow
-                                            key={rowIndex}
-                                            className={cn(
-                                                "group transition-colors border-b last:border-b-0",
-                                                selectedRows.has(rowIndex) ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-accent/30"
-                                            )}
-                                        >
-                                            <TableCell className="text-center border-r py-2">
+            {/* Main Grid or Visualizer */}
+            {showChart ? (
+                <div className="flex-1 overflow-hidden bg-muted/5">
+                    <DataVisualizer
+                        data={data.rows.map(row => {
+                            const obj: any = {};
+                            data.columns.forEach((col, i) => {
+                                obj[col.name] = row[i];
+                            });
+                            return obj;
+                        })}
+                        columns={data.columns}
+                    />
+                </div>
+            ) : (
+                <div className="flex-1 overflow-hidden relative">
+                    <ContextMenu>
+                        <ContextMenuTrigger asChild>
+                            <ScrollArea className="h-full w-full">
+                                <Table className="border-collapse min-w-full">
+                                    <TableHeader className="bg-muted/40 sticky top-0 z-10 shadow-sm border-b-2 border-border/60">
+                                        <TableRow className="border-b shadow-none hover:bg-transparent">
+                                            <TableHead className="w-10 text-center border-r bg-muted/20 p-0 h-auto align-top pt-2">
                                                 <input
                                                     type="checkbox"
-                                                    className="w-3 h-3 rounded accent-primary cursor-pointer"
-                                                    checked={selectedRows.has(rowIndex)}
-                                                    onChange={() => toggleRowSelection(rowIndex)}
+                                                    className="w-3 h-3 rounded accent-primary cursor-pointer mx-auto"
+                                                    checked={data.rows.length > 0 && selectedRows.size === data.rows.length}
+                                                    onChange={(e) => {
+                                                        if (e.target.checked) setSelectedRows(new Set(data.rows.map((_, i) => i)));
+                                                        else setSelectedRows(new Set());
+                                                    }}
                                                 />
-                                            </TableCell>
-                                            {row.map((cell, colIndex) => (
-                                                <TableCell
-                                                    key={colIndex}
+                                            </TableHead>
+                                            {data.columns.map((col, i) => (
+                                                <TableHead
+                                                    key={i}
                                                     className={cn(
-                                                        "text-[12px] py-1.5 border-r last:border-r-0 font-medium font-mono min-w-[120px] px-4",
-                                                        cell === null ? "text-muted-foreground/30 italic font-normal" : "text-foreground/80",
-                                                        editingCell?.row === rowIndex && editingCell?.col === colIndex && "p-0"
+                                                        "border-r last:border-r-0 text-muted-foreground p-0 h-auto align-top transition-colors hover:bg-muted/50",
+                                                        sortColumn === col.name && "bg-primary/5 text-primary font-bold"
                                                     )}
-                                                    onDoubleClick={() => handleCellDoubleClick(rowIndex, colIndex, cell)}
                                                 >
-                                                    {editingCell?.row === rowIndex && editingCell?.col === colIndex ? (
-                                                        <input
-                                                            type="text"
-                                                            className="w-full h-full bg-background border-2 border-primary outline-none px-4 py-1.5 animate-in zoom-in-95 duration-100 shadow-[0_0_10px_rgba(59,130,246,0.3)] z-50"
-                                                            value={editValue}
-                                                            onChange={(e) => setEditValue(e.target.value)}
-                                                            onKeyDown={handleCellKeyDown}
-                                                            onBlur={handleCellSave}
-                                                            autoFocus
-                                                        />
-                                                    ) : (
-                                                        <span className="truncate block max-w-[300px]" title={formatValue(cell)}>
-                                                            {formatValue(cell)}
-                                                        </span>
-                                                    )}
-                                                </TableCell>
+                                                    <div className="flex flex-col">
+                                                        {/* Header Title Area */}
+                                                        <div
+                                                            className="flex items-center justify-between px-2 py-1.5 cursor-pointer select-none group/header"
+                                                            onClick={() => handleSort(col.name)}
+                                                        >
+                                                            <div className="flex items-center gap-1.5 overflow-hidden">
+                                                                <span className="text-[11px] font-bold uppercase tracking-tight truncate" title={col.name}>
+                                                                    {col.name}
+                                                                </span>
+                                                                {col.key === 'PRI' && <div className="w-1 h-1 rounded-full bg-amber-500" title="Primary Key" />}
+                                                            </div>
+
+                                                            <div className="flex items-center text-muted-foreground/30 group-hover/header:text-muted-foreground/80 transition-colors">
+                                                                {sortColumn === col.name ? (
+                                                                    sortDirection === 'ASC' ? <ArrowUp size={10} className="text-primary" /> : <ArrowDown size={10} className="text-primary" />
+                                                                ) : (
+                                                                    <ArrowUpDown size={10} className="opacity-0 group-hover/header:opacity-100" />
+                                                                )}
+                                                            </div>
+                                                        </div>
+
+                                                        <Separator className="bg-border/40" />
+
+                                                        {/* Compact Filter Input */}
+                                                        <div className="relative bg-background/50" onClick={(e) => e.stopPropagation()}>
+                                                            <FilterInput
+                                                                database={database}
+                                                                table={table}
+                                                                colName={col.name}
+                                                                value={columnFilters[col.name] || ''}
+                                                                onChange={(val) => handleColumnFilterChange(col.name, val)}
+                                                                onKeyDown={handleFilterKeyDown}
+                                                                className={cn(
+                                                                    "h-7 border-0 rounded-none text-[10px] bg-transparent focus-within:bg-background transition-all font-mono",
+                                                                    columnFilters[col.name] && "text-primary font-medium bg-primary/5"
+                                                                )}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </TableHead>
                                             ))}
                                         </TableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                            <ScrollBar orientation="horizontal" />
-                        </ScrollArea>
-                    </ContextMenuTrigger>
-                    <ContextMenuContent className="w-56">
-                        <ContextMenuItem onClick={copyAsCSV}>
-                            <FileText className="mr-2 h-4 w-4" />
-                            Copy as CSV
-                        </ContextMenuItem>
-                        <ContextMenuItem onClick={copyAsJSON}>
-                            <FileJson className="mr-2 h-4 w-4" />
-                            Copy as JSON
-                        </ContextMenuItem>
-                        <ContextMenuItem onClick={copyAsSQLInsert}>
-                            <Database className="mr-2 h-4 w-4" />
-                            Copy as SQL INSERT
-                        </ContextMenuItem>
-                        <ContextMenuSeparator />
-                        {editingCell === null && selectedRows.size <= 1 && (
-                            <>
-                                <ContextMenuItem onClick={() => {
-                                    // Hacky way to find clicked cell? 
-                                    // Ideally, ContextMenu should know the target. 
-                                    // In this structure, we might need to store "last right-clicked cell" or pass it.
-                                    // For now, let's assume the user Right-Clicked -> Selects this.
-                                    // Actually, Radix ContextMenu Trigger doesn't pass params easily to Content.
-                                    // Use a state "contextMenuTarget: {col: string, val: any}" set onContextMenu on the cell.
-                                }}>
-                                    <Filter className="mr-2 h-4 w-4" />
-                                    Filter by Value
-                                </ContextMenuItem>
-                                <ContextMenuSeparator />
-                            </>
-                        )}
-                        <ContextMenuSeparator />
-                        <ContextMenuItem onClick={() => {
-                            const text = getSelectedRowsData().map(row => row.join('\t')).join('\n');
-                            navigator.clipboard.writeText(text);
-                            toast.success('Copied to clipboard');
-                        }}>
-                            <Copy className="mr-2 h-4 w-4" />
-                            Copy Raw
-                        </ContextMenuItem>
-                    </ContextMenuContent>
-                </ContextMenu>
+                                    </TableHeader>
+                                    <TableBody>
+                                        {data.rows.map((row, rowIndex) => (
+                                            <TableRow
+                                                key={rowIndex}
+                                                className={cn(
+                                                    "group transition-colors border-b last:border-b-0",
+                                                    selectedRows.has(rowIndex) ? "bg-primary/5 hover:bg-primary/10" : "hover:bg-accent/30"
+                                                )}
+                                            >
+                                                <TableCell className="text-center border-r py-2">
+                                                    <input
+                                                        type="checkbox"
+                                                        className="w-3 h-3 rounded accent-primary cursor-pointer"
+                                                        checked={selectedRows.has(rowIndex)}
+                                                        onChange={() => toggleRowSelection(rowIndex)}
+                                                    />
+                                                </TableCell>
+                                                {row.map((cell, colIndex) => (
+                                                    <TableCell
+                                                        key={colIndex}
+                                                        className={cn(
+                                                            "text-[12px] py-1.5 border-r last:border-r-0 font-medium font-mono min-w-[120px] px-4",
+                                                            cell === null ? "text-muted-foreground/30 italic font-normal" : "text-foreground/80",
+                                                            editingCell?.row === rowIndex && editingCell?.col === colIndex && "p-0"
+                                                        )}
+                                                        onDoubleClick={() => handleCellDoubleClick(rowIndex, colIndex, cell)}
+                                                    >
+                                                        {editingCell?.row === rowIndex && editingCell?.col === colIndex ? (
+                                                            <input
+                                                                type="text"
+                                                                className="w-full h-full bg-background border-2 border-primary outline-none px-4 py-1.5 animate-in zoom-in-95 duration-100 shadow-[0_0_10px_rgba(59,130,246,0.3)] z-50"
+                                                                value={editValue}
+                                                                onChange={(e) => setEditValue(e.target.value)}
+                                                                onKeyDown={handleCellKeyDown}
+                                                                onBlur={handleCellSave}
+                                                                autoFocus
+                                                            />
+                                                        ) : (
+                                                            <span className="truncate block max-w-[300px]" title={formatValue(cell)}>
+                                                                {formatValue(cell)}
+                                                            </span>
+                                                        )}
+                                                    </TableCell>
+                                                ))}
+                                            </TableRow>
+                                        ))}
+                                    </TableBody>
+                                </Table>
+                                <ScrollBar orientation="horizontal" />
+                            </ScrollArea>
+                        </ContextMenuTrigger>
+                        <ContextMenuContent>
+                            <ContextMenuItem disabled>Actions</ContextMenuItem>
+                            <ContextMenuSeparator />
+                            <ContextMenuItem onClick={copyAsCSV}>
+                                <Copy size={14} className="mr-2" /> Copy as CSV
+                            </ContextMenuItem>
+                            <ContextMenuItem onClick={copyAsJSON}>
+                                <FileJson className="mr-2 h-4 w-4" />
+                                Copy as JSON
+                            </ContextMenuItem>
+                            <ContextMenuItem onClick={copyAsSQLInsert}>
+                                <Database className="mr-2 h-4 w-4" />
+                                Copy as SQL INSERT
+                            </ContextMenuItem>
+                            <ContextMenuSeparator />
+                            {editingCell === null && selectedRows.size <= 1 && (
+                                <>
+                                    <ContextMenuItem onClick={() => {
+                                        // Hacky way to find clicked cell? 
+                                        // Ideally, ContextMenu should know the target. 
+                                        // In this structure, we might need to store "last right-clicked cell" or pass it.
+                                        // For now, let's assume the user Right-Clicked -> Selects this.
+                                        // Actually, Radix ContextMenu Trigger doesn't pass params easily to Content.
+                                        // Use a state "contextMenuTarget: {col: string, val: any}" set onContextMenu on the cell.
+                                    }}>
+                                        <Filter className="mr-2 h-4 w-4" />
+                                        Filter by Value
+                                    </ContextMenuItem>
+                                    <ContextMenuSeparator />
+                                </>
+                            )}
+                            <ContextMenuSeparator />
+                            <ContextMenuItem onClick={() => {
+                                const text = getSelectedRowsData().map(row => row.join('\t')).join('\n');
+                                navigator.clipboard.writeText(text);
+                                toast.success('Copied to clipboard');
+                            }}>
+                                <Copy className="mr-2 h-4 w-4" />
+                                Copy Raw
+                            </ContextMenuItem>
+                        </ContextMenuContent>
+                    </ContextMenu>
 
-                {/* Floating Bulk Action bar */}
-                {selectedRows.size > 0 && (
-                    <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-popover border border-primary/40 shadow-2xl rounded-full px-6 py-2.5 flex items-center gap-6 animate-in slide-in-from-bottom-4 zoom-in-95 duration-300 z-50 ring-4 ring-primary/10 backdrop-blur-xl">
-                        <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
-                            <span className="text-[11px] font-bold tracking-wider uppercase text-foreground/90">{selectedRows.size} Rows Selected</span>
+                    {/* Floating Bulk Action bar */}
+                    {selectedRows.size > 0 && (
+                        <div className="absolute bottom-6 left-1/2 -translate-x-1/2 bg-popover border border-primary/40 shadow-2xl rounded-full px-6 py-2.5 flex items-center gap-6 animate-in slide-in-from-bottom-4 zoom-in-95 duration-300 z-50 ring-4 ring-primary/10 backdrop-blur-xl">
+                            <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-primary animate-pulse shadow-[0_0_8px_rgba(59,130,246,0.5)]" />
+                                <span className="text-[11px] font-bold tracking-wider uppercase text-foreground/90">{selectedRows.size} Rows Selected</span>
+                            </div>
+                            <Separator orientation="vertical" className="h-4 bg-primary/20" />
+                            <div className="flex items-center gap-2">
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={handleDeleteSelected}
+                                    className="h-8 px-4 text-[10px] font-black uppercase text-destructive hover:bg-destructive/10 hover:text-destructive tracking-widest gap-2"
+                                >
+                                    <Trash2 size={14} />
+                                    Batch Delete
+                                </Button>
+                                <Button
+                                    variant="ghost"
+                                    size="sm"
+                                    onClick={() => setSelectedRows(new Set())}
+                                    className="h-8 px-4 text-[10px] font-bold uppercase text-muted-foreground hover:bg-muted/30 tracking-widest"
+                                >
+                                    Clear Selection
+                                </Button>
+                            </div>
                         </div>
-                        <Separator orientation="vertical" className="h-4 bg-primary/20" />
-                        <div className="flex items-center gap-2">
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={handleDeleteSelected}
-                                className="h-8 px-4 text-[10px] font-black uppercase text-destructive hover:bg-destructive/10 hover:text-destructive tracking-widest gap-2"
-                            >
-                                <Trash2 size={14} />
-                                Batch Delete
-                            </Button>
-                            <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => setSelectedRows(new Set())}
-                                className="h-8 px-4 text-[10px] font-bold uppercase text-muted-foreground hover:bg-muted/30 tracking-widest"
-                            >
-                                Clear Selection
-                            </Button>
-                        </div>
-                    </div>
-                )}
-            </div>
+                    )}
+                </div>
+            )}
 
             {/* Pagination Footer */}
             <div className="h-10 border-t bg-muted/20 flex items-center justify-between px-4 shrink-0 shadow-inner">

@@ -10,7 +10,11 @@ import {
     Copy,
     FileText,
     Database,
-    X
+    X,
+    ArrowUp,
+    ArrowDown,
+    ArrowUpDown,
+    Filter
 } from 'lucide-react';
 import {
     Table,
@@ -39,6 +43,7 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { toast } from "sonner";
 
 interface Props {
@@ -117,6 +122,10 @@ export function ResultsTable({ results, result, error }: Props) {
     const [selectedRows, setSelectedRows] = useState<Set<number>>(new Set());
     const [jsonPreview, setJsonPreview] = useState<{ value: string; open: boolean }>({ value: '', open: false });
 
+    // Client-side Sorting & Filtering
+    const [sortConfig, setSortConfig] = useState<{ index: number; direction: 'asc' | 'desc' } | null>(null);
+    const [filters, setFilters] = useState<Record<number, string>>({});
+
     const parentRef = useRef<HTMLDivElement>(null);
 
     // Reset active index when data changes significantly
@@ -125,11 +134,57 @@ export function ResultsTable({ results, result, error }: Props) {
             setActiveIndex(0);
         }
         setSelectedRows(new Set());
-    }, [data.length]);
+        setSortConfig(null);
+        setFilters({});
+    }, [data.length, activeIndex]);
 
     const activeResult = data[activeIndex];
-    const rows = activeResult?.rows || [];
+    const rawRows = activeResult?.rows || [];
     const columns = activeResult?.columns || [];
+
+    // Filter and Sort Logic
+    const processedRows = useMemo(() => {
+        let res = [...rawRows];
+
+        // Filter
+        if (Object.keys(filters).length > 0) {
+            res = res.filter(row => {
+                return Object.entries(filters).every(([colIdx, filterVal]) => {
+                    const cellVal = row[Number(colIdx)];
+                    const strVal = cellVal === null ? 'NULL' : String(cellVal).toLowerCase();
+                    return strVal.includes(filterVal.toLowerCase());
+                });
+            });
+        }
+
+        // Sort
+        if (sortConfig) {
+            res.sort((a, b) => {
+                const valA = a[sortConfig.index];
+                const valB = b[sortConfig.index];
+
+                if (valA === valB) return 0;
+                if (valA === null) return 1; // Nulls last
+                if (valB === null) return -1;
+
+                // Numeric sort
+                if (typeof valA === 'number' && typeof valB === 'number') {
+                    return sortConfig.direction === 'asc' ? valA - valB : valB - valA;
+                }
+
+                // String sort
+                const strA = String(valA).toLowerCase();
+                const strB = String(valB).toLowerCase();
+                if (strA < strB) return sortConfig.direction === 'asc' ? -1 : 1;
+                if (strA > strB) return sortConfig.direction === 'asc' ? 1 : -1;
+                return 0;
+            });
+        }
+
+        return res;
+    }, [rawRows, filters, sortConfig]);
+
+    const rows = processedRows;
 
     // Virtual scrolling
     const rowVirtualizer = useVirtualizer({
@@ -278,15 +333,69 @@ export function ResultsTable({ results, result, error }: Props) {
                             {/* Sticky header */}
                             <div className="sticky top-0 z-10 bg-card/95 backdrop-blur-sm border-b shadow-sm">
                                 <div className="flex">
-                                    <div className="w-12 shrink-0 text-center text-[10px] font-black text-muted-foreground/30 py-3 uppercase tracking-tighter border-r">
+                                    <div className="w-12 shrink-0 text-center text-[10px] font-black text-muted-foreground/30 py-3 uppercase tracking-tighter border-r bg-muted/20">
                                         #
                                     </div>
                                     {columns.map((col, i) => (
                                         <div
                                             key={i}
-                                            className="min-w-[120px] flex-1 text-[11px] font-bold text-foreground/80 py-3 px-3 uppercase tracking-wider border-r last:border-r-0"
+                                            className="min-w-[150px] flex-1 text-[11px] font-bold text-foreground/80 py-2 px-3 uppercase tracking-wider border-r last:border-r-0 group/header relative hover:bg-muted/50 transition-colors"
                                         >
-                                            {col}
+                                            <div
+                                                className="flex items-center justify-between cursor-pointer select-none mb-1.5"
+                                                onClick={() => {
+                                                    setSortConfig(current => {
+                                                        if (current?.index === i) {
+                                                            return current.direction === 'asc' ? { index: i, direction: 'desc' } : null;
+                                                        }
+                                                        return { index: i, direction: 'asc' };
+                                                    });
+                                                }}
+                                            >
+                                                <span className="truncate" title={col}>{col}</span>
+                                                <div className="text-muted-foreground/30 group-hover/header:text-muted-foreground/80">
+                                                    {sortConfig?.index === i ? (
+                                                        sortConfig.direction === 'asc' ? <ArrowUp size={12} className="text-primary" /> : <ArrowDown size={12} className="text-primary" />
+                                                    ) : (
+                                                        <ArrowUpDown size={12} className="opacity-0 group-hover/header:opacity-100 transition-opacity" />
+                                                    )}
+                                                </div>
+                                            </div>
+
+                                            <div className="relative">
+                                                <Input
+                                                    className={cn(
+                                                        "h-6 text-[10px] px-2 py-0 bg-background/50 focus:bg-background border-muted-foreground/20 font-mono transition-all",
+                                                        filters[i] ? "border-primary/50 bg-primary/5 text-primary" : ""
+                                                    )}
+                                                    placeholder="Filter..."
+                                                    value={filters[i] || ''}
+                                                    onChange={(e) => {
+                                                        const val = e.target.value;
+                                                        setFilters(prev => {
+                                                            const next = { ...prev, [i]: val };
+                                                            if (!val) delete next[i];
+                                                            return next;
+                                                        });
+                                                    }}
+                                                    onClick={(e) => e.stopPropagation()}
+                                                />
+                                                {filters[i] && (
+                                                    <button
+                                                        className="absolute right-1 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-destructive"
+                                                        onClick={(e) => {
+                                                            e.stopPropagation();
+                                                            setFilters(prev => {
+                                                                const next = { ...prev };
+                                                                delete next[i];
+                                                                return next;
+                                                            });
+                                                        }}
+                                                    >
+                                                        <X size={10} />
+                                                    </button>
+                                                )}
+                                            </div>
                                         </div>
                                     ))}
                                 </div>
@@ -309,7 +418,7 @@ export function ResultsTable({ results, result, error }: Props) {
                                             left: 0,
                                             width: '100%',
                                             height: `${virtualRow.size}px`,
-                                            transform: `translateY(${virtualRow.start + 44}px)`, // +44 for header
+                                            transform: `translateY(${virtualRow.start + 58}px)`, // +58 for enhanced header
                                         }}
                                         onClick={(e) => toggleRowSelection(virtualRow.index, e)}
                                     >

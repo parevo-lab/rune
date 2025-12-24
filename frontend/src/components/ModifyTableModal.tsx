@@ -10,7 +10,8 @@ import {
     GripVertical,
     Type,
     ShieldCheck,
-    Hash
+    Hash,
+    Key
 } from 'lucide-react';
 import {
     Dialog,
@@ -33,7 +34,13 @@ import {
 } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { cn } from '@/lib/utils';
-import { toast } from 'sonner';
+import { Toggle } from '@/components/ui/toggle';
+import {
+    Tooltip,
+    TooltipContent,
+    TooltipProvider,
+    TooltipTrigger,
+} from '@/components/ui/tooltip';
 
 interface Props {
     database: string;
@@ -50,6 +57,15 @@ interface ColumnState extends ColumnInfo {
     isModified?: boolean;
     oldName?: string;
 }
+
+const typeGroups: Record<string, string[]> = {
+    Numeric: ['int', 'tinyint', 'smallint', 'bigint', 'decimal(10,2)', 'float', 'double'],
+    String: ['varchar(255)', 'char(1)', 'text', 'mediumtext', 'longtext', 'json'],
+    Date: ['datetime', 'timestamp', 'date', 'time'],
+    Other: ['boolean', 'blob', 'enum']
+};
+
+const allGroupedTypes = Object.values(typeGroups).reduce((acc, val) => acc.concat(val), [] as string[]);
 
 export function ModifyTableModal({ database, table, columns, onSave, onClose, loading }: Props) {
     const [columnStates, setColumnStates] = useState<ColumnState[]>([]);
@@ -98,11 +114,6 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
         const success = await onSave(alteration);
         if (success) onClose();
     };
-
-    const mysqlTypes = [
-        'int', 'bigint', 'varchar(255)', 'text', 'longtext',
-        'datetime', 'timestamp', 'decimal(10,2)', 'boolean', 'json'
-    ];
 
     return (
         <Dialog open={true} onOpenChange={(open) => !open && onClose()}>
@@ -167,16 +178,26 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                                                 onValueChange={(v) => updateColumn(index, { type: v })}
                                                 disabled={col.isDeleted}
                                             >
-                                                <SelectTrigger className="h-8 text-[11px] bg-background/50 border-muted-foreground/10">
+                                                <SelectTrigger className="h-8 text-[11px] bg-background/50 border-muted-foreground/10 font-mono">
                                                     <SelectValue />
                                                 </SelectTrigger>
-                                                <SelectContent>
-                                                    {/* Ensure current type is always an option */}
-                                                    {!mysqlTypes.includes(col.type) && (
+                                                <SelectContent className="max-h-60">
+                                                    {/* Ensure current custom type is preserved */}
+                                                    {!allGroupedTypes.includes(col.type) && (
                                                         <SelectItem value={col.type} className="text-[11px] font-mono">{col.type.toUpperCase()}</SelectItem>
                                                     )}
-                                                    {mysqlTypes.map(t => (
-                                                        <SelectItem key={t} value={t} className="text-[11px]">{t.toUpperCase()}</SelectItem>
+
+                                                    {Object.entries(typeGroups).map(([group, types]) => (
+                                                        <React.Fragment key={group}>
+                                                            <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground uppercase bg-muted/20">
+                                                                {group}
+                                                            </div>
+                                                            {types.map(t => (
+                                                                <SelectItem key={t} value={t} className="text-[11px] font-mono pl-4">
+                                                                    {t.toUpperCase()}
+                                                                </SelectItem>
+                                                            ))}
+                                                        </React.Fragment>
                                                     ))}
                                                 </SelectContent>
                                             </Select>
@@ -192,18 +213,53 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                                         </div>
 
                                         <div className="w-32">
-                                            <Input
-                                                value={col.default}
-                                                onChange={(e) => updateColumn(index, { default: e.target.value })}
-                                                placeholder="NULL"
-                                                disabled={col.isDeleted}
-                                                className="h-8 text-[11px] font-mono bg-background/50 border-muted-foreground/10"
-                                            />
+                                            {/* Smart Default Input */}
+                                            {(col.type === 'boolean' || col.type === 'tinyint(1)') ? (
+                                                <Select
+                                                    value={col.default}
+                                                    onValueChange={(v) => updateColumn(index, { default: v })}
+                                                    disabled={col.isDeleted}
+                                                >
+                                                    <SelectTrigger className="h-8 text-[11px] bg-background/50 border-muted-foreground/10 font-mono">
+                                                        <SelectValue placeholder="NULL" />
+                                                    </SelectTrigger>
+                                                    <SelectContent>
+                                                        <SelectItem value="">NULL</SelectItem>
+                                                        <SelectItem value="1">TRUE</SelectItem>
+                                                        <SelectItem value="0">FALSE</SelectItem>
+                                                    </SelectContent>
+                                                </Select>
+                                            ) : (
+                                                <Input
+                                                    value={col.default}
+                                                    onChange={(e) => updateColumn(index, { default: e.target.value })}
+                                                    placeholder={col.type.includes('date') ? "NOW()" : "NULL"}
+                                                    disabled={col.isDeleted}
+                                                    className="h-8 text-[11px] font-mono bg-background/50 border-muted-foreground/10"
+                                                />
+                                            )}
                                         </div>
 
-                                        <div className="w-24 flex items-center gap-1.5 px-1">
-                                            {col.key === 'PRI' && <Badge className="bg-amber-500 h-4 text-[8px] font-black border-none uppercase">Primary</Badge>}
-                                            {col.extra && <Badge variant="secondary" className="h-4 text-[8px] font-bold uppercase opacity-50">{col.extra}</Badge>}
+                                        <div className="w-24 flex justify-center items-center">
+                                            <TooltipProvider>
+                                                <Tooltip>
+                                                    <TooltipTrigger asChild>
+                                                        <Toggle
+                                                            pressed={col.key === 'PRI'}
+                                                            onPressedChange={(pressed: boolean) => updateColumn(index, { key: pressed ? 'PRI' : '' })}
+                                                            disabled={!col.isNew} // Only allow for new columns for now
+                                                            variant="outline"
+                                                            size="sm"
+                                                            className={cn("h-6 w-6 p-0", col.key === 'PRI' ? "bg-amber-500 hover:bg-amber-600 text-white" : "")}
+                                                        >
+                                                            <Key size={12} />
+                                                        </Toggle>
+                                                    </TooltipTrigger>
+                                                    <TooltipContent>
+                                                        <p>Primary Key (New Columns Only)</p>
+                                                    </TooltipContent>
+                                                </Tooltip>
+                                            </TooltipProvider>
                                         </div>
                                     </div>
 
@@ -258,7 +314,7 @@ export function ModifyTableModal({ database, table, columns, onSave, onClose, lo
                         </Button>
                     </div>
                 </DialogFooter>
-            </DialogContent>
-        </Dialog>
+            </DialogContent >
+        </Dialog >
     );
 }
