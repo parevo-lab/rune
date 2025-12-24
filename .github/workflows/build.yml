@@ -1,4 +1,4 @@
-name: Build and Release RuneDB
+name: Build and Release Mergen
 
 on:
   push:
@@ -12,15 +12,15 @@ jobs:
         include:
           - os: windows-latest
             platform: windows/amd64
-            name: rune_windows_amd64.exe
+            name: mergen_windows_amd64.exe
             args: ""
           - os: ubuntu-22.04
             platform: linux/amd64
-            name: rune_linux_amd64
+            name: mergen_linux_amd64
             args: ""
           - os: macos-latest
             platform: darwin/universal
-            name: rune_darwin_universal.zip
+            name: mergen_darwin_universal.zip
             args: ""
 
     runs-on: ${{ matrix.os }}
@@ -63,13 +63,13 @@ jobs:
         run: |
           if [ "${{ matrix.os }}" == "windows-latest" ]; then
             # Move the built binary directly
-            mv build/bin/rune.exe ${{ matrix.name }}
+            mv build/bin/mergen.exe ${{ matrix.name }}
           elif [ "${{ matrix.os }}" == "ubuntu-22.04" ]; then
-            mv build/bin/rune ${{ matrix.name }}
+            mv build/bin/mergen ${{ matrix.name }}
           else
             # For macOS, zip the .app bundle
             cd build/bin
-            zip -r ../../${{ matrix.name }} rune.app
+            zip -r ../../${{ matrix.name }} mergen.app
           fi
 
       - name: Generate Checksum
