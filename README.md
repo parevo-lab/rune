@@ -1,64 +1,132 @@
-# RuneDB ⚡
 
-RuneDB is a modern, lightweight, and cross-platform database manager designed for developers who value speed and aesthetics. Built with **Wails**, **Go**, and **React**, it provides a seamless experience for managing MySQL and PostgreSQL databases with a focus on visual clarity and powerful features.
+<div align="center">
+  <img src="https://wails.io/img/wails-logo.svg" alt="RuneDB Logo" width="120" height="120" />
+  <h1>RuneDB</h1>
+  <p>
+    <b>The Aesthetic & High-Performance Database Client</b>
+  </p>
+  <p>
+    Built for the modern developer. Native speed, web flexibility.
+  </p>
 
-![RuneDB Preview](https://raw.githubusercontent.com/wailsapp/wails/master/website/src/assets/images/wails-logo.png) <!-- Replace with actual screenshot later -->
+  [![Go Report Card](https://goreportcard.com/badge/github.com/ahmetbilgay/rune)](https://goreportcard.com/report/github.com/ahmetbilgay/rune)
+  [![License](https://img.shields.io/github/license/ahmetbilgay/rune?style=flat-square)](LICENSE)
+  [![Wails](https://img.shields.io/badge/Powered_by-Wails_v2-red?style=flat-square&logo=wails)](https://wails.io)
+  [![React](https://img.shields.io/badge/Frontend-React-blue?style=flat-square&logo=react)](https://reactjs.org)
 
-## ✨ Features
+  <br />
 
-- **Multi-Database Support**: Native support for **MySQL** and **PostgreSQL**.
-- **Modern SQL Editor**: Execute complex queries with syntax highlighting and results export.
-- **Visual Data Editor (CRUD)**: Easily view, insert, update, and delete rows without writing SQL.
-- **Connection Manager**: Securely save and manage multiple database connections with custom naming.
-- **Schema Explorer**: Navigate through databases, tables, and columns with ease.
-- **Cross-Platform**: Native performance on Windows, macOS, and Linux.
-- **Fast & Lightweight**: Built on the Wails framework for minimal resource footprint.
+  <img src="./assets/preview.png" alt="RuneDB Application Preview" width="100%" style="border-radius: 10px; box-shadow: 0 10px 30px rgba(0,0,0,0.5);" />
+</div>
+
+<br />
+
+## ⚡ What is RuneDB?
+
+**RuneDB** is a next-generation database management tool designed to bridge the gap between **native performance** and **modern web aesthetics**. 
+
+Unlike clunky, legacy SQL clients, RuneDB offers a buttery-smooth experience with a focus on visual clarity. Written in **Go** and **React**, it starts instantly, runs everywhere, and looks beautiful doing it.
+
+---
+
+## ✨ Key Features
+
+### 🚀 **Native Performance**
+Powered by a **Go** backend and the **Wails** framework, RuneDB consumes a fraction of the memory of Electron-based apps while delivering native-speed query execution.
+
+### 🎨 **Stunning Visuals & Theming**
+- **Adaptive UI**: Seamlessly switches between Dark and Light modes.
+- **Modern Design**: Clean typography, glassmorphism accents, and a clutter-free workspace.
+
+### 🛡️ **Secure Access**
+- **SSH Tunneling**: Connect to your production databases securely through SSH tunnels. Native support built right in.
+- **Connection Manager**: Organize your connections (MySQL, PostgreSQL) with ease.
+
+### ⌨️ **Developer-First Workflow**
+- **Command Palette (`Cmd+K`)**: Navigate anywhere, execute commands, and switch contexts without lifting your hands from the keyboard.
+- **Multi-Tab Interface**: juggle multiple queries and table views simultaneously without losing context.
+
+### 📊 **Visual Data Editor**
+- **Spreadsheet-like Editing**: Double-click to edit cells, add rows, or delete data.
+- **Safe Mode**: Changes are staged before committing, preventing accidental data loss.
+
+### 🔄 **Stay Updated**
+- **Auto-Update**: RuneDB automatically checks for updates, ensuring you always have the latest features and security patches.
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Backend**: [Go](https://go.dev/) (Golang)
-- **Frontend**: [React](https://reactjs.org/) with [TypeScript](https://www.typescriptlang.org/)
-- **Styling**: Modern CSS / Tailwind
-- **Framework**: [Wails v2](https://wails.io/)
+RuneDB is built on the shoulders of giants:
+
+| Component | Technology | Description |
+|-----------|------------|-------------|
+| **Core** | [Wails v2](https://wails.io) | The bridge between Go and the web frontend. |
+| **Backend** | [Go (Golang)](https://go.dev) | Handles DB connections, SSH tunneling, and file I/O. |
+| **Frontend** | [React](https://reactjs.org) | Component-based UI architecure. |
+| **Styling** | [Tailwind CSS](https://tailwindcss.com) | Utility-first styling for rapid UI development. |
+| **State** | TypeScript | Type-safe interactions across the entire stack. |
+
+---
 
 ## 🚀 Getting Started
 
 ### Prerequisites
 
-- [Go](https://go.dev/doc/install) (1.23 or later)
-- [Node.js](https://nodejs.org/) (20 or later) & NPM
-- [Wails CLI](https://wails.io/docs/gettingstarted/installation)
+- **Go**: v1.23 or higher
+- **Node.js**: v20 or higher
+- **NPM**: Latest version
 
-### Development
+### Installation (Development)
 
-To run the application in live development mode:
+1. **Clone the repository**
+   ```bash
+   git clone https://github.com/ahmetbilgay/rune.git
+   cd rune
+   ```
 
-```bash
-wails dev
-```
+2. **Install dependencies**
+   ```bash
+   # Frontend dependencies
+   cd frontend && npm install && cd ..
+   ```
 
-### Building
+3. **Run in Dev Mode**
+   ```bash
+   wails dev
+   # This will launch the app and hot-reload on changes
+   ```
 
-To build a production-ready desktop application for your current platform:
+### Building for Production
+
+To create a standalone binary for your OS:
 
 ```bash
 wails build
 ```
 
-The binary will be located in the `build/bin/` directory.
-
-## 🐳 GitHub Actions
-
-RuneDB includes a robust CI/CD pipeline that automatically builds and releases the application for Windows, macOS, and Linux upon pushing a version tag (e.g., `v1.0.0`).
-
-## 🤝 Contributing
-
-Contributions are welcome! Feel free to open issues or submit pull requests to improve RuneDB.
-
-## 📄 License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+The output binary will be located in the `build/bin/` directory.
 
 ---
 
-Built with ❤️ by [ahmetbilgay](https://github.com/ahmetbilgay)
+## 🤝 Contributing
+
+We love contributions! Whether it's a bug fix, a new feature, or just a typo fix:
+
+1. Fork the project.
+2. Create your feature branch (`git checkout -b feature/AmazingFeature`).
+3. Commit your changes (`git commit -m 'Add some AmazingFeature'`).
+4. Push to the branch (`git push origin feature/AmazingFeature`).
+5. Open a Pull Request.
+
+---
+
+## 📄 License
+
+Distributed under the MIT License. See `LICENSE` for more information.
+
+---
+
+<div align="center">
+  <p>Built with ❤️ by <a href="https://github.com/ahmetbilgay">Ahmet Can Bilgay</a></p>
+</div>
