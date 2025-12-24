@@ -1,7 +1,7 @@
 
 <div align="center">
-  <img src="https://wails.io/img/wails-logo.svg" alt="RuneDB Logo" width="120" height="120" />
-  <h1>RuneDB</h1>
+  <img src="https://wails.io/img/wails-logo.svg" alt="Mergen Logo" width="120" height="120" />
+  <h1>Mergen</h1>
   <p>
     <b>The Aesthetic & High-Performance Database Client</b>
   </p>
@@ -21,18 +21,18 @@
 
 <br />
 
-## ⚡ What is RuneDB?
+## ⚡ What is Mergen?
 
-**RuneDB** is a next-generation database management tool designed to bridge the gap between **native performance** and **modern web aesthetics**. 
+**Mergen** is a next-generation database management tool designed to bridge the gap between **native performance** and **modern web aesthetics**. 
 
-Unlike clunky, legacy SQL clients, RuneDB offers a buttery-smooth experience with a focus on visual clarity. Written in **Go** and **React**, it starts instantly, runs everywhere, and looks beautiful doing it.
+Unlike clunky, legacy SQL clients, Mergen offers a buttery-smooth experience with a focus on visual clarity. Written in **Go** and **React**, it starts instantly, runs everywhere, and looks beautiful doing it.
 
 ---
 
 ## ✨ Key Features
 
 ### 🚀 **Native Performance**
-Powered by a **Go** backend and the **Wails** framework, RuneDB consumes a fraction of the memory of Electron-based apps while delivering native-speed query execution.
+Powered by a **Go** backend and the **Wails** framework, Mergen consumes a fraction of the memory of Electron-based apps while delivering native-speed query execution.
 
 ### 🎨 **Stunning Visuals & Theming**
 - **Adaptive UI**: Seamlessly switches between Dark and Light modes.
@@ -55,13 +55,13 @@ Powered by a **Go** backend and the **Wails** framework, RuneDB consumes a fract
 - **Native Experience**: Uses native system dialogs for saving files, integrating seamlessly with your OS.
 
 ### 🔄 **Stay Updated**
-- **Auto-Update**: RuneDB automatically checks for updates, ensuring you always have the latest features and security patches.
+- **Auto-Update**: Mergen automatically checks for updates, ensuring you always have the latest features and security patches.
 
 ---
 
 ## 🛠️ Tech Stack
 
-RuneDB is built on the shoulders of giants:
+Mergen is built on the shoulders of giants:
 
 | Component | Technology | Description |
 |-----------|------------|-------------|

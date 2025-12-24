@@ -43,7 +43,7 @@
         "active": "ACTIVE:"
     },
     "connectionHub": {
-        "heroTitle": "RuneDB",
+        "heroTitle": "Mergen",
         "heroSubtitle": "The next generation multi-database management experience.",
         "newConnection": "New Connection",
         "deployInstance": "Deploy a new instance",

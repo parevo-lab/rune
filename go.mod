@@ -1,4 +1,4 @@
-module opendb
+module mergen
 
 go 1.24.11
 

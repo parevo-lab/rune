@@ -313,7 +313,7 @@ function App() {
                             <Database size={18} strokeWidth={2.5} />
                         </div>
                         <h1 className="text-base font-black tracking-tighter uppercase italic bg-gradient-to-r from-primary to-primary/60 bg-clip-text text-transparent">
-                            RuneDB
+                            Mergen
                         </h1>
                     </div>
 

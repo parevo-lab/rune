@@ -31,10 +31,10 @@ func (u *Updater) SetContext(ctx context.Context) {
 }
 
 func (u *Updater) CheckForUpdate(currentVersion string) (*UpdateInfo, error) {
-	slug := selfupdate.ParseSlug("parevo-lab/rune")
+	slug := selfupdate.ParseSlug("parevo-lab/mergen")
 
 	updater, err := selfupdate.NewUpdater(selfupdate.Config{
-		Filters:       []string{"^rune_"},
+		Filters:       []string{"^mergen_"},
 		UniversalArch: "universal",
 	})
 	if err != nil {
@@ -67,10 +67,10 @@ func (u *Updater) CheckForUpdate(currentVersion string) (*UpdateInfo, error) {
 }
 
 func (u *Updater) ApplyUpdate(latestVersion string) error {
-	slug := selfupdate.ParseSlug("parevo-lab/rune")
+	slug := selfupdate.ParseSlug("parevo-lab/mergen")
 
 	updater, err := selfupdate.NewUpdater(selfupdate.Config{
-		Filters:       []string{"^rune_"},
+		Filters:       []string{"^mergen_"},
 		UniversalArch: "universal",
 	})
 	if err != nil {

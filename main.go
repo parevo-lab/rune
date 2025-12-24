@@ -17,7 +17,7 @@ func main() {
 
 	// Create application with options
 	err := wails.Run(&options.App{
-		Title:     "RuneDB - Database Manager",
+		Title:     "Mergen - Database Manager",
 		Width:     1400,
 		Height:    900,
 		MinWidth:  1024,
