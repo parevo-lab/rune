@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/creativeprojects/go-selfupdate"
+	"github.com/wailsapp/wails/v2/pkg/runtime"
 )
 
 type UpdateInfo struct {
@@ -106,16 +107,27 @@ func (u *Updater) RestartApp() error {
 		return err
 	}
 
+	// On Windows, os.Executable might point to the renamed binary if the update happened.
+	// However, standard behavior for go-selfupdate is to put the NEW binary at the original path.
+	// We want to run the binary at the original path.
+
 	cmd := exec.Command(self)
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
+	// Detach the process from current stdio to prevent I/O issues during restart
+	// cmd.Stdin = os.Stdin
+	// cmd.Stdout = os.Stdout
+	// cmd.Stderr = os.Stderr
 
 	err = cmd.Start()
 	if err != nil {
 		return err
 	}
 
-	os.Exit(0)
+	// Use Wails runtime Quit to ensure clean shutdown
+	if u.ctx != nil {
+		runtime.Quit(u.ctx)
+	} else {
+		os.Exit(0)
+	}
+
 	return nil
 }
