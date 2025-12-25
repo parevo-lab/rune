@@ -51,7 +51,13 @@ jobs:
       - name: Install NSIS (Windows)
         if: matrix.os == 'windows-latest'
         shell: powershell
-        run: choco install nsis
+        run: |
+          choco install nsis
+          echo "C:\Program Files (x86)\NSIS" >> $env:GITHUB_PATH
+
+      - name: Verify NSIS
+        if: matrix.os == 'windows-latest'
+        run: makensis /VERSION
 
       - name: Build Frontend
         run: |
@@ -61,7 +67,7 @@ jobs:
 
       - name: Wails Build
         run: |
-          wails build -platform ${{ matrix.platform }} -clean ${{ matrix.args }} -ldflags "-X main.AppVersion=${{ github.ref_name }}"
+          wails build -platform ${{ matrix.platform }} -clean ${{ matrix.args }} -verbosity 2 -ldflags "-X main.AppVersion=${{ github.ref_name }}"
 
       - name: Rename and Prepare Binary
         shell: bash
